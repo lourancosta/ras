@@ -15,6 +15,7 @@ export const theme = {
     successBg: '#e7f4ec',
     danger: '#b91c1c',
     dangerBg: '#fdecec',
+    overlay: 'rgba(0, 0, 0, 0.35)', // dims the page behind the open phone menu
   },
   radius: '8px',
   sidebarWidth: '232px',
