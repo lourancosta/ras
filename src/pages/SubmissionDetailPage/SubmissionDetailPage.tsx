@@ -1,8 +1,8 @@
 import { useLocation, useParams } from 'react-router'
 import { ArrowLeft } from 'lucide-react'
 import { SubmissionDetail } from '../../components/SubmissionDetail/SubmissionDetail'
-import { PageTitle } from '../../components/ui'
-import { Container, BackLink } from './SubmissionDetailPage.styles'
+import { BackLink, PageTitle } from '../../components/ui'
+import { Container } from './SubmissionDetailPage.styles'
 
 type SubmissionDetailPageProps = {
   backTo: string // where "Back" goes by default
@@ -10,8 +10,8 @@ type SubmissionDetailPageProps = {
   canReview?: boolean // admin: show the review actions
 }
 
-// One submission. Used by framers (/forms/:id) and admins (/admin/forms/:id).
-// The admin table passes `state.back` (the dashboard URL with its filters),
+// One submission. Used by framers (/my-submissions/:id) and admins (/submissions/:id).
+// The admin table passes `state.back` (the submissions URL with its filters),
 // so going back keeps the filters the admin had set.
 export function SubmissionDetailPage({ backTo, backLabel, canReview = false }: SubmissionDetailPageProps) {
   const { id = '' } = useParams()

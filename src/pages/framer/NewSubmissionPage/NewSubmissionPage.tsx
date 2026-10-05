@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
 import type { PostgrestError } from '@supabase/supabase-js'
+import { ArrowLeft } from 'lucide-react'
 import { useAuth } from '../../../auth/auth-context'
 import { PhotoPicker } from '../../../components/PhotoPicker/PhotoPicker'
 import { Toggle } from '../../../components/Toggle/Toggle'
 import {
+  BackLink,
   Button,
   ErrorMessage,
   Field,
@@ -136,7 +138,7 @@ export function NewSubmissionPage() {
       setError(validationError)
       return
     }
-    if (!profile) return // can't happen inside RequireRole, but keeps TypeScript happy
+    if (!profile) return // can't happen inside RequireAuth, but keeps TypeScript happy
 
     // 1. Save the form and get its id back (needed for the photo paths).
     setSubmitStep('saving')
@@ -200,8 +202,8 @@ export function NewSubmissionPage() {
           </ErrorMessage>
         )}
         <Actions>
-          <Button as={Link} to="/">
-            View my forms
+          <Button as={Link} to="/my-submissions">
+            View my submissions
           </Button>
           <SecondaryButton type="button" onClick={() => setSubmitted(null)}>
             Submit another form
@@ -213,7 +215,13 @@ export function NewSubmissionPage() {
 
   return (
     <Container>
-      <PageTitle>New safety form</PageTitle>
+      {/* "New form" isn't in the menu, so the page offers its own way back. */}
+      <div>
+        <BackLink to="/my-submissions">
+          <ArrowLeft size={18} aria-hidden="true" /> Back to my submissions
+        </BackLink>
+        <PageTitle>New safety form</PageTitle>
+      </div>
 
       <Form onSubmit={handleSubmit} noValidate>
         <Section>

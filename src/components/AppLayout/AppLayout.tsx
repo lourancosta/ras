@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { BarChart3, ClipboardList, FilePlus, LayoutDashboard, LogOut } from 'lucide-react'
+import { ClipboardList, LayoutDashboard, LogOut } from 'lucide-react'
 import { Outlet } from 'react-router'
 import { useAuth } from '../../auth/auth-context'
 import type { Enums } from '../../lib/database.types'
@@ -20,19 +20,21 @@ type MenuItem = {
   to: string
   label: string
   icon: LucideIcon
-  end?: boolean // match the path exactly (needed for "/", which prefixes every path)
 }
 
 // Menu options per role. Adding a page = adding one line here.
 const menuByRole: Record<Enums<'user_role'>, MenuItem[]> = {
   framer: [
-    { to: '/', label: 'My forms', icon: ClipboardList, end: true },
-    { to: '/new', label: 'New form', icon: FilePlus },
+    // Only this framer's own numbers (the admin's Dashboard shows everyone).
+    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    // NavLink matches by prefix, so this stays highlighted on /my-submissions/new and
+    // /my-submissions/:id too. New form is a button on that page, not a menu item.
+    { to: '/my-submissions', label: 'My submissions', icon: ClipboardList },
   ],
   admin: [
-    // `end`: otherwise "/admin" would also be active on "/admin/summary".
-    { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
-    { to: '/admin/summary', label: 'Summary', icon: BarChart3 },
+    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    // Prefix match: stays highlighted on a form's detail page (/submissions/:id).
+    { to: '/submissions', label: 'All Submissions', icon: ClipboardList },
   ],
 }
 
@@ -50,8 +52,8 @@ export function AppLayout() {
         </LogoWrapper>
 
         <Menu>
-          {items.map(({ to, label, icon: Icon, end }) => (
-            <MenuLink key={to} to={to} end={end}>
+          {items.map(({ to, label, icon: Icon }) => (
+            <MenuLink key={to} to={to}>
               <Icon size={20} aria-hidden="true" />
               {label}
             </MenuLink>

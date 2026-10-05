@@ -37,7 +37,7 @@ export function LoginPage() {
   }
 
   // Already signed in (or just signed in): go to this role's home page.
-  // If the profile failed to load, "/" lets RequireRole show that error.
+  // If the profile failed to load, "/" lets RequireAuth show that error.
   if (session && !loading) {
     return <Navigate to={profile ? homePathFor(profile.role) : '/'} replace />
   }

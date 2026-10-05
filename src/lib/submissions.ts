@@ -42,7 +42,7 @@ export async function fetchSubmissionDetail(id: string) {
     .eq('id', id)
     .maybeSingle() // 0 rows -> null instead of an error
 
-  // 22P02 = invalid text for a uuid (e.g. /forms/abc): treat as "not found".
+  // 22P02 = invalid text for a uuid (e.g. /submissions/abc): treat as "not found".
   if (error?.code === '22P02') return null
   if (error) throw error
   if (!submission) return null

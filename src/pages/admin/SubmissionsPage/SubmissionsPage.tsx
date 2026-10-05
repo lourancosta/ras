@@ -26,7 +26,7 @@ import {
   IconText,
   Ok,
   Issue,
-} from './AdminDashboardPage.styles'
+} from './SubmissionsPage.styles'
 
 const STATUSES: Enums<'submission_status'>[] = ['submitted', 'reviewed', 'flagged']
 const STATUS_LABELS: Record<Enums<'submission_status'>, string> = {
@@ -38,7 +38,8 @@ const STATUS_LABELS: Record<Enums<'submission_status'>, string> = {
 // Outcome of one load, tagged with the filters it was for (see `loading` below).
 type Result = { key: string; rows: AdminSubmission[]; error: string | null }
 
-export function AdminDashboardPage() {
+// /submissions ("All Submissions"): every submitted form in a filterable table.
+export function SubmissionsPage() {
   // Filters live in the URL (?site=..&worker=..&status=..&from=..&to=..):
   // they survive a refresh, work with Back, and the link can be shared.
   const [searchParams, setSearchParams] = useSearchParams()
@@ -104,15 +105,15 @@ export function AdminDashboardPage() {
 
   const hasFilters = filterKey !== ''
 
-  // Opens a form. state.back = this dashboard URL with its filters, so the detail
-  // page's "Back to dashboard" returns to the same filtered list.
+  // Opens a form. state.back = this page's URL with its filters, so the detail
+  // page's "Back to all submissions" returns to the same filtered list.
   function openSubmission(id: string) {
-    navigate(`/admin/forms/${id}`, { state: { back: `/admin${hasFilters ? `?${filterKey}` : ''}` } })
+    navigate(`/submissions/${id}`, { state: { back: `/submissions${hasFilters ? `?${filterKey}` : ''}` } })
   }
 
   return (
     <Container>
-      <PageTitle>Dashboard</PageTitle>
+      <PageTitle>All Submissions</PageTitle>
 
       <Filters>
         <Field>

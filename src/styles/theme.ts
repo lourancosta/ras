@@ -19,7 +19,7 @@ export const theme = {
   radius: '8px',
   sidebarWidth: '232px',
   // Space around the page content (AppLayout <Main>) on wide screens.
-  // The admin dashboard uses it to size itself to exactly the window height.
+  // The admin submissions page uses it to size itself to exactly the window height.
   pagePaddingDesktop: '32px',
   font: "system-ui, 'Segoe UI', Roboto, sans-serif",
   // Mobile first: framers mostly use phones on site.

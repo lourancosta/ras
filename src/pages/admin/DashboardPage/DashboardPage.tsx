@@ -1,27 +1,23 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { AlertTriangle, CheckCircle2, Clock, Flag, Users } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
-import { FormsPerDayChart, FormsPerSiteChart } from '../../../components/SummaryCharts'
-import { ErrorMessage, Hint, PageTitle } from '../../../components/ui'
+import { FormsPerDayChart, HorizontalBarChart } from '../../../components/SummaryCharts'
+import { Tile, Tiles } from '../../../components/Tile/Tile'
+import {
+  ErrorMessage,
+  GoodNews,
+  Hint,
+  PageTitle,
+  Panel,
+  PanelGrid,
+  PanelTitle,
+} from '../../../components/ui'
 import { formatDate, todayInVancouver } from '../../../lib/dates'
 import { fetchSummary, SUMMARY_DAYS, type Summary } from '../../../lib/summary'
-import {
-  Container,
-  Tiles,
-  TileLink,
-  TileValue,
-  TileLabel,
-  Grid,
-  Panel,
-  PanelTitle,
-  Good,
-  NameList,
-  SiteGroup,
-} from './SummaryPage.styles'
+import { Container, NameList, SiteGroup } from './DashboardPage.styles'
 
-// /admin/summary: today's submissions at a glance + the last 14 days in charts.
-export function SummaryPage() {
+// /dashboard (admin): today's submissions at a glance + the last 14 days in charts.
+export function DashboardPage() {
   const today = todayInVancouver()
   const [summary, setSummary] = useState<Summary | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -38,7 +34,7 @@ export function SummaryPage() {
   return (
     <Container>
       <div>
-        <PageTitle>Summary</PageTitle>
+        <PageTitle>Dashboard</PageTitle>
         <Hint>Today is {formatDate(today)}</Hint>
       </div>
 
@@ -47,29 +43,29 @@ export function SummaryPage() {
 
       {summary && (
         <>
-          {/* Each tile opens the dashboard table with the matching filter. */}
+          {/* Each tile opens the submissions table with the matching filter. */}
           <Tiles>
             <Tile
-              to={`/admin?from=${today}&to=${today}`}
+              to={`/submissions?from=${today}&to=${today}`}
               icon={Users}
               value={`${summary.submittedTodayCount} / ${summary.framerCount}`}
               label="Workers submitted today"
             />
             <Tile
-              to={`/admin?from=${today}&to=${today}`}
+              to={`/submissions?from=${today}&to=${today}`}
               icon={summary.notSubmittedToday.length > 0 ? AlertTriangle : CheckCircle2}
               value={String(summary.notSubmittedToday.length)}
               label="Not submitted today"
               tone={summary.notSubmittedToday.length > 0 ? 'danger' : 'success'}
             />
             <Tile
-              to="/admin?status=submitted"
+              to="/submissions?status=submitted"
               icon={Clock}
               value={String(summary.pendingCount)}
               label="Pending review"
             />
             <Tile
-              to="/admin?status=flagged"
+              to="/submissions?status=flagged"
               icon={Flag}
               value={String(summary.flaggedCount)}
               label="Flagged"
@@ -77,19 +73,19 @@ export function SummaryPage() {
             />
           </Tiles>
 
-          <Grid>
+          <PanelGrid>
             <Panel>
               <PanelTitle>Not submitted today</PanelTitle>
               {summary.notSubmittedToday.length === 0 ? (
-                <Good>
+                <GoodNews>
                   <CheckCircle2 size={18} aria-hidden="true" /> Everyone has submitted today.
-                </Good>
+                </GoodNews>
               ) : (
                 <NameList>
                   {summary.notSubmittedToday.map((framer) => (
                     <li key={framer.id}>
-                      {/* Opens that worker's forms in the dashboard. */}
-                      <Link to={`/admin?worker=${framer.id}`}>{framer.full_name}</Link>
+                      {/* Opens that worker's forms in the submissions table. */}
+                      <Link to={`/submissions?worker=${framer.id}`}>{framer.full_name}</Link>
                     </li>
                   ))}
                 </NameList>
@@ -115,7 +111,7 @@ export function SummaryPage() {
             <Panel>
               <PanelTitle>Forms per site</PanelTitle>
               <Hint>Last {SUMMARY_DAYS} days</Hint>
-              <FormsPerSiteChart data={summary.perSite} />
+              <HorizontalBarChart data={summary.perSite} valueLabel="Forms" />
             </Panel>
 
             <Panel>
@@ -123,29 +119,9 @@ export function SummaryPage() {
               <Hint>Last {SUMMARY_DAYS} days, all sites</Hint>
               <FormsPerDayChart data={summary.perDay} />
             </Panel>
-          </Grid>
+          </PanelGrid>
         </>
       )}
     </Container>
-  )
-}
-
-type TileProps = {
-  to: string
-  icon: LucideIcon
-  value: string
-  label: string
-  tone?: 'success' | 'danger'
-}
-
-// A big number with a label. Colour is never the only signal: the icon and
-// label say the same thing (good for colour-blind users).
-function Tile({ to, icon: Icon, value, label, tone }: TileProps) {
-  return (
-    <TileLink to={to} $tone={tone}>
-      <Icon size={22} aria-hidden="true" />
-      <TileValue>{value}</TileValue>
-      <TileLabel>{label}</TileLabel>
-    </TileLink>
   )
 }

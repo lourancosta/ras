@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { Card } from '../../../components/ui'
 
-// On wide screens the dashboard is exactly as tall as the window (minus the page
+// On wide screens the page is exactly as tall as the window (minus the page
 // padding): title and filters stay in place and only the table rows scroll.
 // On phones the page scrolls normally (a fixed-height box would leave few rows visible).
 export const Container = styled.div`

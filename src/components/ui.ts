@@ -1,4 +1,5 @@
 // Small shared building blocks so forms look the same everywhere.
+import { Link } from 'react-router'
 import styled, { css } from 'styled-components'
 
 export const Card = styled.div`
@@ -57,6 +58,7 @@ export const Button = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px; /* space between an icon and the text */
   padding: 12px 16px;
   text-decoration: none;
   border: none;
@@ -99,4 +101,56 @@ export const PageTitle = styled.h1`
   margin: 0 0 16px;
   font-size: 1.5rem;
   color: ${({ theme }) => theme.colors.brand};
+`
+
+// "← Back to ..." link at the top of a page.
+export const BackLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  color: ${({ theme }) => theme.colors.brand};
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`
+
+// ---------- Dashboard panels (admin and framer dashboards) ----------
+
+// Two columns on wide screens, one on phones.
+export const PanelGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+`
+
+export const Panel = styled(Card)`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  min-width: 0; /* lets the chart shrink with the card */
+`
+
+export const PanelTitle = styled.h2`
+  margin: 0;
+  font-size: 1.05rem;
+  color: ${({ theme }) => theme.colors.brand};
+`
+
+// Green line with a check icon, e.g. "Everyone has submitted today."
+export const GoodNews = styled.p`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: ${({ theme }) => theme.colors.success};
+  font-weight: 600;
 `

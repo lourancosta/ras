@@ -2,17 +2,23 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { useTheme } from 'styled-components'
 import { formatDate, formatShortDate } from '../lib/dates'
 
-// Two simple bar charts for the admin summary. Each has a single series
+// Two simple bar charts for the dashboards. Each has a single series
 // (one colour, brand green), so no legend is needed: the card title names it.
 // Style choices: thin bars with rounded ends, light grid, muted axis text,
 // a tooltip on hover. Recharts' ResponsiveContainer resizes them with the card.
 
-type SiteRow = { name: string; forms: number }
+type NameRow = { name: string; count: number }
 type DayRow = { date: string; forms: number }
 
-export function FormsPerSiteChart({ data }: { data: SiteRow[] }) {
+type HorizontalBarChartProps = {
+  data: NameRow[]
+  valueLabel: string // shown in the tooltip, e.g. "Forms" or "Issues"
+}
+
+// One bar per name: forms per site (admin) or issues per checklist item (framer).
+export function HorizontalBarChart({ data, valueLabel }: HorizontalBarChartProps) {
   const theme = useTheme()
-  // Horizontal bars: long site names read better on the left than under the bars.
+  // Horizontal bars: long names read better on the left than under the bars.
   const height = Math.max(160, data.length * 44)
 
   return (
@@ -29,18 +35,18 @@ export function FormsPerSiteChart({ data }: { data: SiteRow[] }) {
         <YAxis
           type="category"
           dataKey="name"
-          width={170}
+          width={190} // fits the longest label ("Tools and cords in good condition")
           tick={{ fill: theme.colors.text, fontSize: 13 }}
           axisLine={false}
           tickLine={false}
         />
-        <Tooltip cursor={{ fill: theme.colors.bg }} formatter={(value) => [value, 'Forms']} />
+        <Tooltip cursor={{ fill: theme.colors.bg }} formatter={(value) => [value, valueLabel]} />
         <Bar
-          dataKey="forms"
+          dataKey="count"
           fill={theme.colors.brand}
           radius={[0, 4, 4, 0]}
           barSize={20}
-          // Only 4-5 bars, so the number at the end of each is easy to read.
+          // Few bars (5 sites / 8 items), so the number at the end of each is easy to read.
           label={{ position: 'right', fill: theme.colors.text, fontSize: 12 }}
         />
       </BarChart>

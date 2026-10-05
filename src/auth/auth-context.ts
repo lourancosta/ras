@@ -26,5 +26,5 @@ export function useAuth(): AuthState {
 
 // Where each role lands after signing in.
 export function homePathFor(role: Enums<'user_role'>): string {
-  return role === 'admin' ? '/admin' : '/'
+  return role === 'admin' ? '/dashboard' : '/my-submissions'
 }

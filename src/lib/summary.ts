@@ -1,5 +1,6 @@
-// Data for the admin summary page: today's status and the last 14 days.
+// Data for the dashboards: today's status and the last 14 days.
 // Loaded with a few small queries, then counted in the browser (the data is small).
+import { checklistGroups, countIssues } from './checklist'
 import { addDays } from './dates'
 import { supabase } from './supabase'
 
@@ -53,11 +54,11 @@ export async function fetchSummary(today: string) {
   const perSite = siteList
     .map((site) => ({
       name: site.name,
-      forms: recentList.filter((s) => s.site_id === site.id).length,
+      count: recentList.filter((s) => s.site_id === site.id).length,
       isActive: site.is_active,
     }))
-    .filter((row) => row.isActive || row.forms > 0)
-    .sort((a, b) => b.forms - a.forms)
+    .filter((row) => row.isActive || row.count > 0)
+    .sort((a, b) => b.count - a.count)
 
   // Forms per day, including days with 0 forms (e.g. Sundays) so gaps are visible.
   const perDay = Array.from({ length: SUMMARY_DAYS }, (_, i) => {
@@ -78,3 +79,57 @@ export async function fetchSummary(today: string) {
 }
 
 export type Summary = Awaited<ReturnType<typeof fetchSummary>>
+
+// ---------- Framer: "my" dashboard ----------
+
+// The signed-in framer's own numbers. Row Level Security only returns their rows;
+// the user_id filters make the intent explicit (same as fetchMySubmissions).
+export async function fetchMySummary(userId: string, today: string) {
+  const since = addDays(today, -(SUMMARY_DAYS - 1)) // 14 days including today
+
+  const [recent, flagged] = await Promise.all([
+    supabase
+      .from('submissions')
+      .select('*') // the checklist answers are needed to count issues
+      .eq('user_id', userId)
+      .gte('work_date', since)
+      .lte('work_date', today),
+    // All time, not only 14 days: a flagged form still needs attention. Count only.
+    supabase
+      .from('submissions')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('status', 'flagged'),
+  ])
+
+  if (recent.error) throw recent.error
+  if (flagged.error) throw flagged.error
+  const recentList = recent.data ?? []
+
+  // Forms per day, including days with 0 forms so missed days are visible.
+  const perDay = Array.from({ length: SUMMARY_DAYS }, (_, i) => {
+    const date = addDays(since, i)
+    return { date, forms: recentList.filter((s) => s.work_date === date).length }
+  })
+
+  // How often each checklist item was answered "No", most frequent first.
+  // All 8 items are listed: 0 is information too ("never an issue").
+  const perItem = checklistGroups
+    .flatMap((group) => group.items)
+    .map((item) => ({
+      name: item.label,
+      count: recentList.filter((s) => !s[item.key]).length,
+    }))
+    .sort((a, b) => b.count - a.count)
+
+  return {
+    submittedToday: recentList.some((s) => s.work_date === today),
+    formsCount: recentList.length,
+    issuesCount: recentList.reduce((total, s) => total + countIssues(s), 0),
+    flaggedCount: flagged.count ?? 0,
+    perDay,
+    perItem,
+  }
+}
+
+export type MySummary = Awaited<ReturnType<typeof fetchMySummary>>
