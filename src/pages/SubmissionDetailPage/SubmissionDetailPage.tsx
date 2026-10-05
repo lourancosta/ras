@@ -1,8 +1,8 @@
-import { Link, useLocation, useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { ArrowLeft } from 'lucide-react'
-import styled from 'styled-components'
-import { SubmissionDetail } from '../components/SubmissionDetail'
-import { PageTitle } from '../components/ui'
+import { SubmissionDetail } from '../../components/SubmissionDetail/SubmissionDetail'
+import { PageTitle } from '../../components/ui'
+import { Container, BackLink } from './SubmissionDetailPage.styles'
 
 type SubmissionDetailPageProps = {
   backTo: string // where "Back" goes by default
@@ -29,21 +29,3 @@ export function SubmissionDetailPage({ backTo, backLabel, canReview = false }: S
     </Container>
   )
 }
-
-const Container = styled.div`
-  max-width: 640px;
-`
-
-const BackLink = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 12px;
-  color: ${({ theme }) => theme.colors.brand};
-  font-weight: 600;
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
-`

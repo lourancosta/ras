@@ -1,70 +1,7 @@
-import type { LucideIcon } from 'lucide-react'
-import { BarChart3, ClipboardList, FilePlus, LayoutDashboard, LogOut } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router'
+import { NavLink } from 'react-router'
 import styled, { css } from 'styled-components'
-import { useAuth } from '../auth/auth-context'
-import type { Enums } from '../lib/database.types'
-import { Logo } from './Logo'
 
-type MenuItem = {
-  to: string
-  label: string
-  icon: LucideIcon
-  end?: boolean // match the path exactly (needed for "/", which prefixes every path)
-}
-
-// Menu options per role. Adding a page = adding one line here.
-const menuByRole: Record<Enums<'user_role'>, MenuItem[]> = {
-  framer: [
-    { to: '/', label: 'My forms', icon: ClipboardList, end: true },
-    { to: '/new', label: 'New form', icon: FilePlus },
-  ],
-  admin: [
-    // `end`: otherwise "/admin" would also be active on "/admin/summary".
-    { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
-    { to: '/admin/summary', label: 'Summary', icon: BarChart3 },
-  ],
-}
-
-// Shell for every signed-in page: side menu (logo, role options, user, sign out) + page content.
-// On phones the side menu becomes a bar at the top of the page.
-export function AppLayout() {
-  const { profile, signOut } = useAuth()
-  const items = profile ? menuByRole[profile.role] : []
-
-  return (
-    <Layout>
-      <Sidebar>
-        <LogoWrapper>
-          <Logo />
-        </LogoWrapper>
-
-        <Menu>
-          {items.map(({ to, label, icon: Icon, end }) => (
-            <MenuLink key={to} to={to} end={end}>
-              <Icon size={20} aria-hidden="true" />
-              {label}
-            </MenuLink>
-          ))}
-        </Menu>
-
-        <Footer>
-          <UserName>{profile?.full_name}</UserName>
-          <MenuButton onClick={signOut}>
-            <LogOut size={20} aria-hidden="true" />
-            Sign out
-          </MenuButton>
-        </Footer>
-      </Sidebar>
-
-      <Main>
-        <Outlet />
-      </Main>
-    </Layout>
-  )
-}
-
-const Layout = styled.div`
+export const Layout = styled.div`
   min-height: 100vh;
 
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
@@ -73,7 +10,7 @@ const Layout = styled.div`
   }
 `
 
-const Sidebar = styled.aside`
+export const Sidebar = styled.aside`
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -90,11 +27,11 @@ const Sidebar = styled.aside`
   }
 `
 
-const LogoWrapper = styled.div`
+export const LogoWrapper = styled.div`
   padding: 0 12px;
 `
 
-const Menu = styled.nav`
+export const Menu = styled.nav`
   display: flex;
   flex-wrap: wrap; /* phones: options side by side */
   gap: 4px;
@@ -155,7 +92,7 @@ const menuItemStyles = css`
 `
 
 // NavLink adds the "active" class to the link for the current page.
-const MenuLink = styled(NavLink)`
+export const MenuLink = styled(NavLink)`
   ${menuItemStyles}
 
   &.active {
@@ -163,12 +100,12 @@ const MenuLink = styled(NavLink)`
   }
 `
 
-const MenuButton = styled.button`
+export const MenuButton = styled.button`
   ${menuItemStyles}
 `
 
 // Pushed to the bottom of the sidebar on desktop.
-const Footer = styled.div`
+export const Footer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -181,7 +118,7 @@ const Footer = styled.div`
   }
 `
 
-const UserName = styled.span`
+export const UserName = styled.span`
   padding: 0 12px;
   font-size: 0.9rem;
   opacity: 0.85;
@@ -189,7 +126,7 @@ const UserName = styled.span`
 
 // No max-width: pages use all the space next to the menu and resize with the window.
 // Pages that read better narrow (the framer forms) set their own max-width.
-const Main = styled.main`
+export const Main = styled.main`
   min-width: 0; /* lets wide content (the admin table) scroll inside instead of overflowing */
   padding: 24px 16px;
 

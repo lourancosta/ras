@@ -1,13 +1,23 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { AlertTriangle, Camera, CheckCircle2, ChevronRight } from 'lucide-react'
-import styled from 'styled-components'
-import { useAuth } from '../../auth/auth-context'
-import { StatusBadge } from '../../components/StatusBadge'
-import { Button, Card, ErrorMessage, Hint, PageTitle } from '../../components/ui'
-import { countIssues } from '../../lib/checklist'
-import { formatDate, todayInVancouver } from '../../lib/dates'
-import { fetchMySubmissions, type MySubmission } from '../../lib/submissions'
+import { useAuth } from '../../../auth/auth-context'
+import { StatusBadge } from '../../../components/StatusBadge/StatusBadge'
+import { Button, ErrorMessage, Hint, PageTitle } from '../../../components/ui'
+import { countIssues } from '../../../lib/checklist'
+import { formatDate, todayInVancouver } from '../../../lib/dates'
+import { fetchMySubmissions, type MySubmission } from '../../../lib/submissions'
+import {
+  Container,
+  Reminder,
+  List,
+  Row,
+  RowMain,
+  RowTop,
+  RowInfo,
+  Ok,
+  Issue,
+} from './MySubmissionsPage.styles'
 
 export function MySubmissionsPage() {
   const { profile } = useAuth()
@@ -89,86 +99,3 @@ export function MySubmissionsPage() {
     </Container>
   )
 }
-
-const Container = styled.div`
-  max-width: 640px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`
-
-const Reminder = styled(Card)`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px;
-  border-left: 4px solid ${({ theme }) => theme.colors.accent};
-  font-weight: 600;
-`
-
-const List = styled.ul`
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`
-
-// The whole card is the link (big tap target on phones).
-const Row = styled(Link)`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: ${({ theme }) => theme.colors.surface};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.radius};
-  color: inherit;
-  text-decoration: none;
-
-  &:hover,
-  &:focus-visible {
-    border-color: ${({ theme }) => theme.colors.brand};
-  }
-`
-
-const RowMain = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-`
-
-const RowTop = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-`
-
-const RowInfo = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 16px;
-  font-size: 0.9rem;
-  color: ${({ theme }) => theme.colors.muted};
-
-  span {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-`
-
-const Ok = styled.span`
-  color: ${({ theme }) => theme.colors.success};
-`
-
-const Issue = styled.span`
-  color: ${({ theme }) => theme.colors.danger};
-  font-weight: 600;
-`

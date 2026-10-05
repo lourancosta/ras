@@ -1,19 +1,19 @@
 import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router'
 import { RequireRole } from './auth/RequireRole'
-import { AppLayout } from './components/AppLayout'
+import { AppLayout } from './components/AppLayout/AppLayout'
 import { Hint } from './components/ui'
-import { LoginPage } from './pages/LoginPage'
+import { LoginPage } from './pages/LoginPage/LoginPage'
 import { NotFoundPage } from './pages/NotFoundPage'
-import { SubmissionDetailPage } from './pages/SubmissionDetailPage'
-import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
-import { MySubmissionsPage } from './pages/framer/MySubmissionsPage'
-import { NewSubmissionPage } from './pages/framer/NewSubmissionPage'
+import { SubmissionDetailPage } from './pages/SubmissionDetailPage/SubmissionDetailPage'
+import { AdminDashboardPage } from './pages/admin/AdminDashboardPage/AdminDashboardPage'
+import { MySubmissionsPage } from './pages/framer/MySubmissionsPage/MySubmissionsPage'
+import { NewSubmissionPage } from './pages/framer/NewSubmissionPage/NewSubmissionPage'
 
 // Loaded only when an admin opens it: the charts library (Recharts) is large and
 // framers on phone data never need it. Vite puts it in a separate file.
 const SummaryPage = lazy(() =>
-  import('./pages/admin/SummaryPage').then((module) => ({ default: module.SummaryPage })),
+  import('./pages/admin/SummaryPage/SummaryPage').then((module) => ({ default: module.SummaryPage })),
 )
 
 // Route tree. Parent routes without a path only wrap their children:

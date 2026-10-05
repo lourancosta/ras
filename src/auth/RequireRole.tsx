@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router'
 import type { Enums } from '../lib/database.types'
-import { FullPageMessage } from '../components/FullPageMessage'
+import { FullPageMessage } from '../components/FullPageMessage/FullPageMessage'
 import { Button } from '../components/ui'
 import { homePathFor, useAuth } from './auth-context'
 

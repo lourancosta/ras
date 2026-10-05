@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router'
-import styled from 'styled-components'
-import { homePathFor, useAuth } from '../auth/auth-context'
-import { supabase } from '../lib/supabase'
-import { Button, Card, ErrorMessage, Field, Input } from '../components/ui'
+import { homePathFor, useAuth } from '../../auth/auth-context'
+import { supabase } from '../../lib/supabase'
+import { Button, ErrorMessage, Field, Input } from '../../components/ui'
+import { Page, LoginCard, Title, Subtitle } from './LoginPage.styles'
 
 export function LoginPage() {
   const { session, profile, loading } = useAuth()
@@ -79,31 +79,3 @@ export function LoginPage() {
     </Page>
   )
 }
-
-const Page = styled.main`
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-`
-
-const LoginCard = styled(Card)`
-  width: 100%;
-  max-width: 380px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  border-top: 4px solid ${({ theme }) => theme.colors.accent};
-`
-
-const Title = styled.h1`
-  margin: 0;
-  font-size: 1.4rem;
-  color: ${({ theme }) => theme.colors.brand};
-`
-
-const Subtitle = styled.p`
-  margin: -8px 0 0;
-  color: ${({ theme }) => theme.colors.muted};
-`

@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { CheckCircle2, Flag } from 'lucide-react'
-import styled from 'styled-components'
-import { useAuth } from '../auth/auth-context'
-import type { Enums } from '../lib/database.types'
-import { reviewSubmission } from '../lib/submissions'
-import { Button, Card, ErrorMessage, Hint, SuccessMessage } from './ui'
+import { useAuth } from '../../auth/auth-context'
+import type { Enums } from '../../lib/database.types'
+import { reviewSubmission } from '../../lib/submissions'
+import { ErrorMessage, Hint, SuccessMessage } from '../ui'
+import { Panel, Title, Actions, ReviewedButton, FlagButton } from './ReviewPanel.styles'
 
 type ReviewStatus = Exclude<Enums<'submission_status'>, 'submitted'>
 
@@ -82,33 +82,3 @@ export function ReviewPanel({ submissionId, status, onReviewed }: ReviewPanelPro
     </Panel>
   )
 }
-
-const Panel = styled(Card)`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  border-left: 4px solid ${({ theme }) => theme.colors.accent};
-`
-
-const Title = styled.h3`
-  margin: 0;
-  font-size: 1.05rem;
-  color: ${({ theme }) => theme.colors.brand};
-`
-
-const Actions = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-`
-
-const ReviewedButton = styled(Button)`
-  gap: 8px;
-  background: ${({ theme }) => theme.colors.success};
-`
-
-const FlagButton = styled(Button)`
-  gap: 8px;
-  background: ${({ theme }) => theme.colors.danger};
-`

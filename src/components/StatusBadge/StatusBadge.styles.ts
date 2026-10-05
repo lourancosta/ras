@@ -1,20 +1,7 @@
 import styled, { css } from 'styled-components'
-import type { Enums } from '../lib/database.types'
+import type { Enums } from '../../lib/database.types'
 
-type Status = Enums<'submission_status'>
-
-const LABELS: Record<Status, string> = {
-  submitted: 'Pending review',
-  reviewed: 'Reviewed',
-  flagged: 'Flagged',
-}
-
-// Review status of a form, as a small coloured pill.
-export function StatusBadge({ status }: { status: Status }) {
-  return <Badge $status={status}>{LABELS[status]}</Badge>
-}
-
-const Badge = styled.span<{ $status: Status }>`
+export const Badge = styled.span<{ $status: Enums<'submission_status'> }>`
   display: inline-block;
   padding: 2px 10px;
   border-radius: 999px;

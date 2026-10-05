@@ -1,12 +1,24 @@
 import { useEffect, useState } from 'react'
 import { Check, X } from 'lucide-react'
-import styled from 'styled-components'
-import { checklistGroups } from '../lib/checklist'
-import { formatDate, formatDateTime } from '../lib/dates'
-import { fetchSubmissionDetail, type SubmissionDetailData } from '../lib/submissions'
-import { ReviewPanel, type ReviewUpdate } from './ReviewPanel'
-import { StatusBadge } from './StatusBadge'
-import { Card, ErrorMessage, Hint } from './ui'
+import { checklistGroups } from '../../lib/checklist'
+import { formatDate, formatDateTime } from '../../lib/dates'
+import { fetchSubmissionDetail, type SubmissionDetailData } from '../../lib/submissions'
+import { ReviewPanel, type ReviewUpdate } from '../ReviewPanel/ReviewPanel'
+import { StatusBadge } from '../StatusBadge/StatusBadge'
+import { ErrorMessage, Hint } from '../ui'
+import {
+  Wrapper,
+  Section,
+  HeaderRow,
+  Title,
+  Meta,
+  SectionTitle,
+  List,
+  Item,
+  Answer,
+  Notes,
+  PhotoGrid,
+} from './SubmissionDetail.styles'
 
 // Loads and shows one submission: header, checklist answers, notes and photos.
 // Used by the framer's and the admin's detail pages; `canReview` adds the admin's
@@ -122,89 +134,3 @@ export function SubmissionDetail({ id, canReview = false }: { id: string; canRev
     </Wrapper>
   )
 }
-
-const Wrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`
-
-const Section = styled(Card)`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-`
-
-const HeaderRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-`
-
-const Title = styled.h2`
-  margin: 0;
-  font-size: 1.25rem;
-  color: ${({ theme }) => theme.colors.brand};
-`
-
-const Meta = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 0.95rem;
-`
-
-const SectionTitle = styled.h3`
-  margin: 0;
-  font-size: 1.05rem;
-  color: ${({ theme }) => theme.colors.brand};
-`
-
-const List = styled.ul`
-  margin: 0;
-  padding: 0;
-  list-style: none;
-`
-
-const Item = styled.li`
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-
-  &:last-child {
-    border-bottom: none;
-  }
-`
-
-const Answer = styled.span<{ $ok: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: 600;
-  color: ${({ theme, $ok }) => ($ok ? theme.colors.success : theme.colors.danger)};
-`
-
-// pre-wrap keeps the line breaks the framer typed.
-const Notes = styled.p`
-  margin: 0;
-  white-space: pre-wrap;
-`
-
-const PhotoGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 8px;
-
-  img {
-    display: block;
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: ${({ theme }) => theme.radius};
-  }
-`

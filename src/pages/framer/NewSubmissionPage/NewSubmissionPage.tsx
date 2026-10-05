@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
 import type { PostgrestError } from '@supabase/supabase-js'
-import styled from 'styled-components'
-import { useAuth } from '../../auth/auth-context'
-import { PhotoPicker } from '../../components/PhotoPicker'
-import { Toggle } from '../../components/Toggle'
+import { useAuth } from '../../../auth/auth-context'
+import { PhotoPicker } from '../../../components/PhotoPicker/PhotoPicker'
+import { Toggle } from '../../../components/Toggle/Toggle'
 import {
   Button,
-  Card,
   ErrorMessage,
   Field,
   Hint,
@@ -16,17 +14,25 @@ import {
   Select,
   SuccessMessage,
   Textarea,
-} from '../../components/ui'
-import { checklistGroups, emptyChecklist, type ChecklistAnswers } from '../../lib/checklist'
-import type { Tables } from '../../lib/database.types'
-import { formatDate, todayInVancouver } from '../../lib/dates'
+} from '../../../components/ui'
+import { checklistGroups, emptyChecklist, type ChecklistAnswers } from '../../../lib/checklist'
+import type { Tables } from '../../../lib/database.types'
+import { formatDate, todayInVancouver } from '../../../lib/dates'
 import {
   MAX_PHOTOS,
   preparePhotos,
   uploadSubmissionPhotos,
   type SelectedPhoto,
-} from '../../lib/photos'
-import { supabase } from '../../lib/supabase'
+} from '../../../lib/photos'
+import { supabase } from '../../../lib/supabase'
+import {
+  Container,
+  Form,
+  Section,
+  SectionTitle,
+  Actions,
+  SecondaryButton,
+} from './NewSubmissionPage.styles'
 
 const NOTES_MAX_LENGTH = 2000 // same limit as the DB check constraint
 
@@ -327,41 +333,3 @@ function submitErrorMessage(error: PostgrestError): string {
   }
   return 'Could not submit the form. Check your connection and try again.'
 }
-
-const Container = styled.div`
-  max-width: 640px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`
-
-const Section = styled(Card)`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 16px;
-`
-
-const SectionTitle = styled.h2`
-  margin: 0 0 -8px;
-  font-size: 1.1rem;
-  color: ${({ theme }) => theme.colors.brand};
-`
-
-const Actions = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-`
-
-const SecondaryButton = styled(Button)`
-  background: transparent;
-  color: ${({ theme }) => theme.colors.brand};
-  border: 1px solid ${({ theme }) => theme.colors.brand};
-`
