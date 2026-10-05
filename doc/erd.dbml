@@ -1,0 +1,66 @@
+// Paste into https://dbdiagram.io, then Export -> PNG / PDF
+
+Enum user_role {
+  framer
+  admin
+}
+
+Enum submission_status {
+  submitted
+  reviewed
+  flagged
+}
+
+Table auth_users [note: 'Managed by Supabase Auth'] {
+  id uuid [pk]
+  email text [unique]
+}
+
+Table profiles {
+  id uuid [pk, ref: - auth_users.id]
+  full_name text [not null]
+  role user_role [not null, default: 'framer']
+  created_at timestamptz
+}
+
+Table sites {
+  id uuid [pk]
+  name text [not null, unique]
+  address text
+  is_active boolean [not null, default: true]
+  created_at timestamptz
+}
+
+Table submissions {
+  id uuid [pk]
+  user_id uuid [not null, ref: > profiles.id]
+  site_id uuid [not null, ref: > sites.id]
+  work_date date [not null]
+  ppe_hard_hat boolean [not null]
+  ppe_vest boolean [not null]
+  ppe_boots boolean [not null]
+  ppe_eye_protection boolean [not null]
+  fall_protection boolean [not null]
+  ladders_inspected boolean [not null]
+  tools_cords_ok boolean [not null]
+  hazards_identified boolean [not null]
+  notes text
+  status submission_status [not null, default: 'submitted']
+  reviewed_by uuid [ref: > profiles.id]
+  reviewed_at timestamptz
+  created_at timestamptz
+
+  indexes {
+    (user_id, site_id, work_date) [unique, name: 'one_per_day']
+    (site_id, work_date)
+  }
+}
+
+Table submission_photos {
+  id uuid [pk]
+  submission_id uuid [not null, ref: > submissions.id]
+  storage_path text [not null, unique]
+  mime_type text [not null]
+  size_bytes integer [not null]
+  created_at timestamptz
+}
