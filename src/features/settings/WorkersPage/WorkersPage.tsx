@@ -2,21 +2,31 @@ import { useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { DataTable, type Column } from '../../../components/DataTable/DataTable'
 import { Modal } from '../../../components/Modal/Modal'
-import { Button, ErrorMessage, Hint, PageTitle, Pill, SuccessMessage } from '../../../components/ui'
+import {
+  Button,
+  ErrorMessage,
+  Hint,
+  ListPage,
+  PageHeader,
+  PageTitle,
+  Pill,
+  SuccessMessage,
+} from '../../../components/ui'
 import { useAuth } from '../../auth/auth-context'
 import { WorkerForm } from '../components/WorkerForm/WorkerForm'
 import { ROLE_LABELS } from '../roles'
 import { fetchWorkers, type Worker } from '../workers'
-import { Container, Header } from './WorkersPage.styles'
 
+// `card` = where each column goes on a phone card; unmarked columns are the detail line.
 const columns: Column<Worker>[] = [
-  { header: 'Name', cell: (worker) => worker.full_name },
+  { header: 'Name', cell: (worker) => worker.full_name, card: 'title' },
   { header: 'Email', cell: (worker) => worker.email ?? '—' },
   { header: 'Role', cell: (worker) => ROLE_LABELS[worker.role] },
   {
     header: 'Status',
     cell: (worker) =>
       worker.is_active ? <Pill $tone="success">Active</Pill> : <Pill $tone="muted">Inactive</Pill>,
+    card: 'badge',
   },
 ]
 
@@ -72,13 +82,13 @@ export function WorkersPage() {
       : 'Loading…'
 
   return (
-    <Container>
-      <Header>
+    <ListPage>
+      <PageHeader>
         <PageTitle>Workers</PageTitle>
         <Button type="button" onClick={() => openModal({ mode: 'create' })}>
           <Plus size={18} aria-hidden="true" /> New worker
         </Button>
-      </Header>
+      </PageHeader>
 
       {modal && (
         <Modal title={modal.mode === 'edit' ? 'Edit worker' : 'New worker'} onClose={() => setModal(null)}>
@@ -102,6 +112,6 @@ export function WorkersPage() {
         rowLabel={(worker) => `Edit worker: ${worker.full_name}`}
         emptyMessage={workers ? 'No workers yet.' : undefined}
       />
-    </Container>
+    </ListPage>
   )
 }

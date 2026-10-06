@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
-import { AlertTriangle, Camera, CheckCircle2 } from 'lucide-react'
 import { DataTable, type Column } from '../../../components/DataTable/DataTable'
 import { StatusBadge } from '../components/StatusBadge/StatusBadge'
+import { ChecklistResult, PhotoCount } from '../components/SubmissionCells/SubmissionCells'
 import {
   ClearFiltersButton,
   ErrorMessage,
@@ -10,22 +10,22 @@ import {
   FilterCard,
   Hint,
   Input,
+  ListPage,
   PageTitle,
   ResultBar,
   Select,
 } from '../../../components/ui'
-import { countIssues } from '../checklist'
 import type { Enums } from '../../../lib/database.types'
 import { formatDate } from '../../../lib/dates'
 import {
   ADMIN_ROW_LIMIT,
   fetchFilterOptions,
   fetchSubmissions,
+  photoCountOf,
   type AdminSubmission,
   type FilterOptions,
   type SubmissionFilters,
 } from '../submissions'
-import { Container, IconText, Ok, Issue } from './AllSubmissionsPage.styles'
 
 const STATUSES: Enums<'submission_status'>[] = ['submitted', 'reviewed', 'flagged']
 const STATUS_LABELS: Record<Enums<'submission_status'>, string> = {
@@ -34,41 +34,20 @@ const STATUS_LABELS: Record<Enums<'submission_status'>, string> = {
   flagged: 'Flagged',
 }
 
-// Table columns. Each cell is drawn from one row (a submission with its worker, site
-// and photo count).
+// Columns (table on wide screens). `card` = where each one goes on a phone card;
+// unmarked columns are the card's detail line.
 const columns: Column<AdminSubmission>[] = [
-  { header: 'Worker', cell: (row) => row.worker?.full_name },
+  { header: 'Worker', cell: (row) => row.worker?.full_name, card: 'title' },
   { header: 'Site', cell: (row) => row.site?.name },
-  {
-    header: 'Checklist',
-    cell: (row) => {
-      const issues = countIssues(row)
-      return issues === 0 ? (
-        <Ok>
-          <CheckCircle2 size={16} aria-hidden="true" /> OK
-        </Ok>
-      ) : (
-        <Issue>
-          <AlertTriangle size={16} aria-hidden="true" /> {issues} issue{issues > 1 ? 's' : ''}
-        </Issue>
-      )
-    },
-  },
+  { header: 'Checklist', cell: (row) => <ChecklistResult answers={row} /> },
   {
     header: 'Photos',
     cell: (row) => {
-      // `submission_photos(count)` comes back as [{ count: n }].
-      const photoCount = row.submission_photos[0]?.count ?? 0
-      return (
-        photoCount > 0 && (
-          <IconText>
-            <Camera size={16} aria-hidden="true" /> {photoCount}
-          </IconText>
-        )
-      )
+      const count = photoCountOf(row.submission_photos)
+      return count > 0 && <PhotoCount count={count} />
     },
   },
-  { header: 'Status', cell: (row) => <StatusBadge status={row.status} /> },
+  { header: 'Status', cell: (row) => <StatusBadge status={row.status} />, card: 'badge' },
   { header: 'Date', cell: (row) => formatDate(row.work_date) },
 ]
 
@@ -149,7 +128,7 @@ export function AllSubmissionsPage() {
   }
 
   return (
-    <Container>
+    <ListPage>
       <PageTitle>All Submissions</PageTitle>
 
       <FilterCard>
@@ -230,6 +209,6 @@ export function AllSubmissionsPage() {
         }
         emptyMessage={!loading && !error ? 'No forms match these filters.' : undefined}
       />
-    </Container>
+    </ListPage>
   )
 }

@@ -2,19 +2,29 @@ import { useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { DataTable, type Column } from '../../../components/DataTable/DataTable'
 import { Modal } from '../../../components/Modal/Modal'
-import { Button, ErrorMessage, Hint, PageTitle, Pill, SuccessMessage } from '../../../components/ui'
+import {
+  Button,
+  ErrorMessage,
+  Hint,
+  ListPage,
+  PageHeader,
+  PageTitle,
+  Pill,
+  SuccessMessage,
+} from '../../../components/ui'
 import { SiteForm } from '../components/SiteForm/SiteForm'
 import { fetchSites, type Site } from '../sites'
-import { Container, Header } from './JobSitesPage.styles'
 
+// `card` = where each column goes on a phone card; unmarked columns are the detail line.
 const columns: Column<Site>[] = [
-  { header: 'Name', cell: (site) => site.name },
+  { header: 'Name', cell: (site) => site.name, card: 'title' },
   { header: 'Address', cell: (site) => site.address ?? '—' },
   {
     header: 'Status',
     // Inactive sites keep their history but can't be picked on new forms.
     cell: (site) =>
       site.is_active ? <Pill $tone="success">Active</Pill> : <Pill $tone="muted">Inactive</Pill>,
+    card: 'badge',
   },
 ]
 
@@ -65,13 +75,13 @@ export function JobSitesPage() {
       : 'Loading…'
 
   return (
-    <Container>
-      <Header>
+    <ListPage>
+      <PageHeader>
         <PageTitle>Job sites</PageTitle>
         <Button type="button" onClick={() => openModal({ mode: 'create' })}>
           <Plus size={18} aria-hidden="true" /> New site
         </Button>
-      </Header>
+      </PageHeader>
 
       {modal && (
         <Modal
@@ -99,6 +109,6 @@ export function JobSitesPage() {
         rowLabel={(site) => `Edit site: ${site.name}`}
         emptyMessage={sites ? 'No job sites yet. Add the first one with "New site".' : undefined}
       />
-    </Container>
+    </ListPage>
   )
 }

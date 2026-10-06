@@ -174,6 +174,36 @@ export const GoodNews = styled.p`
   font-weight: 600;
 `
 
+// ---------- List pages (All Submissions, My submissions, Job sites, Workers) ----------
+
+// Page with a DataTable. On wide screens the page is exactly as tall as the window
+// (minus the page padding): title and filters stay in place and only the table rows
+// scroll (DataTable takes the height left, flex: 1). On phones the page scrolls normally
+// and the list shows as cards.
+export const ListPage = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    height: calc(100vh - 2 * ${({ theme }) => theme.pagePaddingDesktop});
+    height: calc(100dvh - 2 * ${({ theme }) => theme.pagePaddingDesktop}); /* dvh: correct on tablets with toolbars */
+  }
+`
+
+// Title on the left, the page's main button on the right (wraps under it if there's no room).
+export const PageHeader = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  h1 {
+    margin: 0; /* the page's gap already spaces it */
+  }
+`
+
 // ---------- Filters (All Submissions, My submissions) ----------
 
 // The filter dropdowns: as many columns as fit (at least 140px each), stretched to fill.

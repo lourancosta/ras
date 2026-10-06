@@ -9,6 +9,11 @@ import { supabase } from '../../lib/supabase'
 // The bucket is private, so this is the only way to show a photo.
 const SIGNED_URL_SECONDS = 60 * 60
 
+// Number of photos from a `submission_photos(count)` join, which comes back as [{ count: n }].
+export function photoCountOf(photos: { count: number }[]): number {
+  return photos[0]?.count ?? 0
+}
+
 // Max rows in "My submissions"; filters narrow it down.
 export const MY_ROW_LIMIT = 100
 

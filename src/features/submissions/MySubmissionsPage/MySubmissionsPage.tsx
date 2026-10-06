@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router'
-import { AlertTriangle, Camera, CheckCircle2, ChevronRight, FilePlus } from 'lucide-react'
+import { Link, useNavigate, useSearchParams } from 'react-router'
+import { FilePlus } from 'lucide-react'
 import { useAuth } from '../../auth/auth-context'
 import { can } from '../../../lib/permissions'
+import { DataTable, type Column } from '../../../components/DataTable/DataTable'
 import { StatusBadge } from '../components/StatusBadge/StatusBadge'
+import { ChecklistResult, PhotoCount } from '../components/SubmissionCells/SubmissionCells'
 import {
   Button,
   ClearFiltersButton,
@@ -11,17 +13,20 @@ import {
   Field,
   FilterCard,
   Hint,
+  ListPage,
+  PageHeader,
   PageTitle,
   ResultBar,
   Select,
 } from '../../../components/ui'
-import { checklistGroups, countIssues } from '../checklist'
+import { checklistGroups } from '../checklist'
 import { formatDate, todayInVancouver } from '../../../lib/dates'
 import {
   fetchMySubmissions,
   fetchSiteOptions,
   fetchSubmittedToday,
   MY_ROW_LIMIT,
+  photoCountOf,
   type MySubmission,
 } from '../submissions'
 import {
@@ -30,20 +35,25 @@ import {
   dateRangeFor,
   parseMyFilters,
 } from '../myFilters'
-import {
-  Container,
-  Header,
-  Reminder,
-  List,
-  Row,
-  RowMain,
-  RowTop,
-  RowInfo,
-  Ok,
-  Issue,
-} from './MySubmissionsPage.styles'
+import { Reminder } from './MySubmissionsPage.styles'
 
 type SiteOption = Awaited<ReturnType<typeof fetchSiteOptions>>[number]
+
+// Columns (table on wide screens). `card` = where each one goes on a phone card;
+// unmarked columns are the card's detail line.
+const columns: Column<MySubmission>[] = [
+  { header: 'Site', cell: (row) => row.site?.name, card: 'title' },
+  { header: 'Date', cell: (row) => formatDate(row.work_date) },
+  { header: 'Checklist', cell: (row) => <ChecklistResult answers={row} /> },
+  {
+    header: 'Photos',
+    cell: (row) => {
+      const count = photoCountOf(row.submission_photos)
+      return count > 0 && <PhotoCount count={count} />
+    },
+  },
+  { header: 'Status', cell: (row) => <StatusBadge status={row.status} />, card: 'badge' },
+]
 
 // Outcome of one load, tagged with the filters it was for (see `loading` below).
 type Result = { key: string; rows: MySubmission[]; error: string | null }
@@ -52,6 +62,7 @@ type Result = { key: string; rows: MySubmission[]; error: string | null }
 // (site, status, date, checklist), and is the way to start a new one.
 export function MySubmissionsPage() {
   const { profile } = useAuth()
+  const navigate = useNavigate()
   const userId = profile?.id
   const today = todayInVancouver()
   const canCreate = can(profile?.role, 'submissions.create')
@@ -136,15 +147,15 @@ export function MySubmissionsPage() {
       (count === MY_ROW_LIMIT ? ` (showing the most recent ${MY_ROW_LIMIT}, narrow the filters)` : '')
 
   return (
-    <Container>
-      <Header>
+    <ListPage>
+      <PageHeader>
         <PageTitle>My submissions</PageTitle>
         {canCreate && (
           <Button as={Link} to="/my-submissions/new">
             <FilePlus size={18} aria-hidden="true" /> New form
           </Button>
         )}
-      </Header>
+      </PageHeader>
 
       {/* Reminder: a form is expected before starting work each day. */}
       {canCreate && submittedToday === false && (
@@ -221,50 +232,23 @@ export function MySubmissionsPage() {
       </ResultBar>
 
       {error && <ErrorMessage>{error}</ErrorMessage>}
-      {!loading && !error && count === 0 && (
-        <Hint>{hasFilters ? 'No forms match these filters.' : "You haven't submitted any forms yet."}</Hint>
-      )}
 
-      <List>
-        {submissions?.map((submission) => {
-          const issues = countIssues(submission)
-          // `submission_photos(count)` comes back as [{ count: n }].
-          const photoCount = submission.submission_photos[0]?.count ?? 0
-          return (
-            <li key={submission.id}>
-              {/* state.back = this list's URL with its filters, so the detail page's
-                  "Back to my submissions" returns to the same filtered list. */}
-              <Row to={`/my-submissions/${submission.id}`} state={{ back: listUrl }}>
-                <RowMain>
-                  <RowTop>
-                    <strong>{submission.site?.name}</strong>
-                    <StatusBadge status={submission.status} />
-                  </RowTop>
-                  <RowInfo>
-                    <span>{formatDate(submission.work_date)}</span>
-                    {issues === 0 ? (
-                      <Ok>
-                        <CheckCircle2 size={16} aria-hidden="true" /> All checks OK
-                      </Ok>
-                    ) : (
-                      <Issue>
-                        <AlertTriangle size={16} aria-hidden="true" /> {issues} issue
-                        {issues > 1 ? 's' : ''}
-                      </Issue>
-                    )}
-                    {photoCount > 0 && (
-                      <span>
-                        <Camera size={16} aria-hidden="true" /> {photoCount}
-                      </span>
-                    )}
-                  </RowInfo>
-                </RowMain>
-                <ChevronRight size={20} aria-hidden="true" />
-              </Row>
-            </li>
-          )
-        })}
-      </List>
-    </Container>
+      <DataTable
+        columns={columns}
+        rows={submissions ?? []}
+        rowKey={(submission) => submission.id}
+        // state.back = this list's URL with its filters, so the detail page's
+        // "Back to my submissions" returns to the same filtered list.
+        onRowClick={(submission) => navigate(`/my-submissions/${submission.id}`, { state: { back: listUrl } })}
+        rowLabel={(submission) => `Open form: ${submission.site?.name}, ${formatDate(submission.work_date)}`}
+        emptyMessage={
+          loading || error
+            ? undefined
+            : hasFilters
+              ? 'No forms match these filters.'
+              : "You haven't submitted any forms yet."
+        }
+      />
+    </ListPage>
   )
 }
