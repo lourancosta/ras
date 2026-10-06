@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { CheckCircle2, Flag } from 'lucide-react'
 import { useAuth } from '../../../auth/auth-context'
 import type { Enums } from '../../../../lib/database.types'
 import { reviewSubmission } from '../../submissions'
-import { ErrorMessage, Hint, SuccessMessage } from '../../../../components/ui'
-import { Panel, Title, Actions, ReviewedButton, FlagButton } from './ReviewPanel.styles'
+import { ButtonPair, ErrorMessage, Hint, SuccessMessage } from '../../../../components/ui'
+import { DecisionButtons, type ReviewDecision } from '../DecisionButtons/DecisionButtons'
+import { Panel, Title } from './ReviewPanel.styles'
 
-type ReviewStatus = Exclude<Enums<'submission_status'>, 'submitted'>
+type ReviewStatus = ReviewDecision
 
 // What changed, so the parent can update the page without reloading.
 export type ReviewUpdate = {
@@ -23,11 +23,12 @@ type ReviewPanelProps = {
 }
 
 const DONE_MESSAGE: Record<ReviewStatus, string> = {
-  reviewed: 'Marked as reviewed.',
+  reviewed: 'Reviewed.',
   flagged: 'Flagged for follow-up.',
 }
 
-// Admin-only actions on a form: mark it reviewed (all fine) or flag it (needs follow-up).
+// Admin-only actions on a form: review it (all fine) or flag it (needs follow-up).
+// Same Flag / Review buttons as the review queue (DecisionButtons): the saved status is solid.
 // The status can be changed again later, e.g. flagged -> reviewed once the issue is fixed.
 export function ReviewPanel({ submissionId, status, onReviewed }: ReviewPanelProps) {
   const { profile } = useAuth()
@@ -56,27 +57,15 @@ export function ReviewPanel({ submissionId, status, onReviewed }: ReviewPanelPro
     <Panel>
       <Title>Review</Title>
       <Hint>
-        Mark as reviewed if everything is fine, or flag it if something needs follow-up.
+        Review it if everything is fine, or flag it if something needs follow-up.
       </Hint>
-      <Actions>
-        <ReviewedButton
-          type="button"
-          onClick={() => handleReview('reviewed')}
-          // The current status is disabled: clicking it again would change nothing.
-          disabled={saving !== null || status === 'reviewed'}
-        >
-          <CheckCircle2 size={18} aria-hidden="true" />
-          {saving === 'reviewed' ? 'Saving…' : status === 'reviewed' ? 'Reviewed' : 'Mark reviewed'}
-        </ReviewedButton>
-        <FlagButton
-          type="button"
-          onClick={() => handleReview('flagged')}
-          disabled={saving !== null || status === 'flagged'}
-        >
-          <Flag size={18} aria-hidden="true" />
-          {saving === 'flagged' ? 'Saving…' : status === 'flagged' ? 'Flagged' : 'Flag'}
-        </FlagButton>
-      </Actions>
+      <ButtonPair>
+        <DecisionButtons
+          selected={status === 'submitted' ? undefined : status}
+          saving={saving}
+          onChoose={handleReview}
+        />
+      </ButtonPair>
       {message && <SuccessMessage>{message}</SuccessMessage>}
       {error && <ErrorMessage>{error}</ErrorMessage>}
     </Panel>

@@ -95,6 +95,26 @@ export const Button = styled.button`
   }
 `
 
+// Two buttons side by side (e.g. Flag / Review, Previous / Next).
+// Phones: centred, 45% of the width each. Wide screens: natural width, from the left.
+export const ButtonPair = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+
+  & > * {
+    flex: 0 0 45%;
+  }
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    justify-content: flex-start;
+
+    & > * {
+      flex: 0 0 auto;
+    }
+  }
+`
+
 // Outlined version of Button, for the less important action (Cancel, "Submit another").
 export const SecondaryButton = styled(Button)`
   background: transparent;

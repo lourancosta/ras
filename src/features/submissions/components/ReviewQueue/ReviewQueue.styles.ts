@@ -1,5 +1,4 @@
 import styled from 'styled-components'
-import { Button } from '../../../../components/ui'
 
 // "3 / 8" on the left, what was already saved for this form on the right.
 export const Progress = styled.div`
@@ -54,32 +53,6 @@ export const ActionsFooter = styled.div`
     flex-direction: row;
     justify-content: space-between;
   }
-`
-
-// One pair of buttons. Phones: side by side, 45% of the width each.
-export const ButtonPair = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-
-  & > * {
-    flex: 0 0 45%;
-  }
-
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    & > * {
-      flex: 0 0 auto; /* natural width on wide screens */
-    }
-  }
-`
-
-// Flag / Reviewed. Not chosen yet: a light, see-through tint of its colour with coloured text.
-// Chosen (saved for this form): the full colour with white text, like a normal Button.
-// color-mix() blends the colour with transparent, so 15% = mostly see-through.
-export const DecisionButton = styled(Button)<{ $tone: 'danger' | 'brand'; $selected: boolean }>`
-  background: ${({ theme, $tone, $selected }) =>
-    $selected ? theme.colors[$tone] : `color-mix(in srgb, ${theme.colors[$tone]} 15%, transparent)`};
-  color: ${({ theme, $tone, $selected }) => ($selected ? theme.colors.brandText : theme.colors[$tone])};
 `
 
 // End of the queue: the totals.

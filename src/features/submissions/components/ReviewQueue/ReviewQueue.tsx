@@ -1,23 +1,22 @@
 import { useState } from 'react'
-import { ChevronLeft, ChevronRight, CheckCircle2, Flag } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Modal } from '../../../../components/Modal/Modal'
-import { Button, ErrorMessage, Hint, SecondaryButton, SuccessMessage } from '../../../../components/ui'
+import { Button, ButtonPair, ErrorMessage, Hint, SecondaryButton, SuccessMessage } from '../../../../components/ui'
 import { useAuth } from '../../../auth/auth-context'
 import { reviewSubmission } from '../../submissions'
+import { DecisionButtons, type ReviewDecision } from '../DecisionButtons/DecisionButtons'
 import { SubmissionDetail } from '../SubmissionDetail/SubmissionDetail'
 import {
   ActionsFooter,
-  ButtonPair,
   Counter,
   Fill,
-  DecisionButton,
   FooterRow,
   Progress,
   Summary,
   Track,
 } from './ReviewQueue.styles'
 
-type Decision = 'reviewed' | 'flagged'
+type Decision = ReviewDecision
 
 // What was saved for one form, so the page behind can update its table.
 export type QueueReview = {
@@ -60,7 +59,7 @@ export function ReviewQueue({ ids, onReviewed, onClose }: ReviewQueueProps) {
 
   // Save the decision for the current form. It doesn't move on: Next does that.
   async function saveDecision(decision: Decision) {
-    if (!profile || saved === decision) return // already saved as this: nothing to do
+    if (!profile) return
     setSaving(decision)
     setError(null)
     try {
@@ -125,30 +124,7 @@ export function ReviewQueue({ ids, onReviewed, onClose }: ReviewQueueProps) {
         // Save buttons first: left on wide screens, top row on phones (see ActionsFooter).
         <ActionsFooter>
           <ButtonPair>
-            {/* Label: the action (Flag / Review) until chosen, then the result (Flagged / Reviewed).
-                aria-pressed: screen readers say which one is chosen (the solid one). */}
-            <DecisionButton
-              type="button"
-              $tone="danger"
-              $selected={saved === 'flagged'}
-              aria-pressed={saved === 'flagged'}
-              onClick={() => saveDecision('flagged')}
-              disabled={busy}
-            >
-              <Flag size={18} aria-hidden="true" />
-              {saving === 'flagged' ? 'Saving…' : saved === 'flagged' ? 'Flagged' : 'Flag'}
-            </DecisionButton>
-            <DecisionButton
-              type="button"
-              $tone="brand"
-              $selected={saved === 'reviewed'}
-              aria-pressed={saved === 'reviewed'}
-              onClick={() => saveDecision('reviewed')}
-              disabled={busy}
-            >
-              <CheckCircle2 size={18} aria-hidden="true" />
-              {saving === 'reviewed' ? 'Saving…' : saved === 'reviewed' ? 'Reviewed' : 'Review'}
-            </DecisionButton>
+            <DecisionButtons selected={saved} saving={saving} onChoose={saveDecision} />
           </ButtonPair>
           <ButtonPair>
             <SecondaryButton type="button" onClick={() => goTo(index - 1)} disabled={busy || index === 0}>
