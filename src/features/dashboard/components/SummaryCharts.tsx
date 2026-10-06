@@ -7,16 +7,18 @@ import { formatDate, formatShortDate } from '../../../lib/dates'
 // Style choices: thin bars with rounded ends, light grid, muted axis text,
 // a tooltip on hover. Recharts' ResponsiveContainer resizes them with the card.
 
-type NameRow = { name: string; count: number }
+// `id` lets a click say which row it was (e.g. the checklist item's key).
+type NameRow = { name: string; count: number; id?: string }
 type DayRow = { date: string; forms: number }
 
 type HorizontalBarChartProps = {
   data: NameRow[]
   valueLabel: string // shown in the tooltip, e.g. "Forms" or "Issues"
+  onBarClick?: (row: NameRow) => void // makes the bars clickable (pointer cursor)
 }
 
 // One bar per name: forms per site (admin) or issues per checklist item (framer).
-export function HorizontalBarChart({ data, valueLabel }: HorizontalBarChartProps) {
+export function HorizontalBarChart({ data, valueLabel, onBarClick }: HorizontalBarChartProps) {
   const theme = useTheme()
   // Horizontal bars: long names read better on the left than under the bars.
   const height = Math.max(160, data.length * 44)
@@ -46,6 +48,9 @@ export function HorizontalBarChart({ data, valueLabel }: HorizontalBarChartProps
           fill={theme.colors.brand}
           radius={[0, 4, 4, 0]}
           barSize={20}
+          // Recharts passes the clicked bar; `payload` is our data row.
+          onClick={onBarClick ? (bar) => onBarClick(bar.payload as NameRow) : undefined}
+          cursor={onBarClick ? 'pointer' : undefined}
           // Few bars (5 sites / 8 items), so the number at the end of each is easy to read.
           label={{ position: 'right', fill: theme.colors.text, fontSize: 12 }}
         />
@@ -54,7 +59,12 @@ export function HorizontalBarChart({ data, valueLabel }: HorizontalBarChartProps
   )
 }
 
-export function FormsPerDayChart({ data }: { data: DayRow[] }) {
+type FormsPerDayChartProps = {
+  data: DayRow[]
+  onBarClick?: (row: DayRow) => void // makes the bars clickable (pointer cursor)
+}
+
+export function FormsPerDayChart({ data, onBarClick }: FormsPerDayChartProps) {
   const theme = useTheme()
 
   return (
@@ -81,7 +91,14 @@ export function FormsPerDayChart({ data }: { data: DayRow[] }) {
           labelFormatter={(label) => formatDate(String(label))}
           formatter={(value) => [value, 'Forms']}
         />
-        <Bar dataKey="forms" fill={theme.colors.brand} radius={[4, 4, 0, 0]} maxBarSize={28} />
+        <Bar
+          dataKey="forms"
+          fill={theme.colors.brand}
+          radius={[4, 4, 0, 0]}
+          maxBarSize={28}
+          onClick={onBarClick ? (bar) => onBarClick(bar.payload as DayRow) : undefined}
+          cursor={onBarClick ? 'pointer' : undefined}
+        />
       </BarChart>
     </ResponsiveContainer>
   )

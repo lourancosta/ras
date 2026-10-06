@@ -10,8 +10,8 @@ type SubmissionDetailPageProps = {
 }
 
 // One submission. Used by framers (/my-submissions/:id) and admins (/submissions/:id).
-// The admin table passes `state.back` (the submissions URL with its filters),
-// so going back keeps the filters the admin had set.
+// Both lists pass `state.back` (their URL with its filters), so going back keeps
+// the filters that were set. Opened directly (no state): back goes to `backTo`.
 export function SubmissionDetailPage({ backTo, backLabel }: SubmissionDetailPageProps) {
   const { id = '' } = useParams()
   const location = useLocation()

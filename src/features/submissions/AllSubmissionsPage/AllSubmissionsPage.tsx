@@ -3,7 +3,17 @@ import { useNavigate, useSearchParams } from 'react-router'
 import { AlertTriangle, Camera, CheckCircle2 } from 'lucide-react'
 import { DataTable, type Column } from '../../../components/DataTable/DataTable'
 import { StatusBadge } from '../components/StatusBadge/StatusBadge'
-import { ErrorMessage, Field, Hint, Input, PageTitle, Select } from '../../../components/ui'
+import {
+  ClearFiltersButton,
+  ErrorMessage,
+  Field,
+  FilterCard,
+  Hint,
+  Input,
+  PageTitle,
+  ResultBar,
+  Select,
+} from '../../../components/ui'
 import { countIssues } from '../checklist'
 import type { Enums } from '../../../lib/database.types'
 import { formatDate } from '../../../lib/dates'
@@ -15,7 +25,7 @@ import {
   type FilterOptions,
   type SubmissionFilters,
 } from '../submissions'
-import { Container, Filters, ResultBar, ClearButton, IconText, Ok, Issue } from './AllSubmissionsPage.styles'
+import { Container, IconText, Ok, Issue } from './AllSubmissionsPage.styles'
 
 const STATUSES: Enums<'submission_status'>[] = ['submitted', 'reviewed', 'flagged']
 const STATUS_LABELS: Record<Enums<'submission_status'>, string> = {
@@ -142,7 +152,7 @@ export function AllSubmissionsPage() {
     <Container>
       <PageTitle>All Submissions</PageTitle>
 
-      <Filters>
+      <FilterCard>
         <Field>
           Site
           <Select value={siteId ?? ''} onChange={(e) => setFilter('site', e.target.value)}>
@@ -190,7 +200,7 @@ export function AllSubmissionsPage() {
           To
           <Input type="date" value={to ?? ''} min={from} onChange={(e) => setFilter('to', e.target.value)} />
         </Field>
-      </Filters>
+      </FilterCard>
 
       <ResultBar>
         <Hint>
@@ -200,9 +210,9 @@ export function AllSubmissionsPage() {
               (rows.length === ADMIN_ROW_LIMIT ? ` (showing the most recent ${ADMIN_ROW_LIMIT}, narrow the filters)` : '')}
         </Hint>
         {hasFilters && (
-          <ClearButton type="button" onClick={() => setSearchParams({}, { replace: true })}>
+          <ClearFiltersButton type="button" onClick={() => setSearchParams({}, { replace: true })}>
             Clear filters
-          </ClearButton>
+          </ClearFiltersButton>
         )}
       </ResultBar>
 

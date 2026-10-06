@@ -1,5 +1,4 @@
 import styled from 'styled-components'
-import { Card } from '../../../components/ui'
 
 // On wide screens the page is exactly as tall as the window (minus the page
 // padding): title and filters stay in place and only the table rows scroll.
@@ -13,31 +12,6 @@ export const Container = styled.div`
     height: calc(100vh - 2 * ${({ theme }) => theme.pagePaddingDesktop});
     height: calc(100dvh - 2 * ${({ theme }) => theme.pagePaddingDesktop}); /* dvh: correct on tablets with toolbars */
   }
-`
-
-export const Filters = styled(Card)`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
-  padding: 16px;
-`
-
-export const ResultBar = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 32px;
-`
-
-export const ClearButton = styled.button`
-  padding: 4px 10px;
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.radius};
-  background: ${({ theme }) => theme.colors.surface};
-  color: ${({ theme }) => theme.colors.brand};
-  font-weight: 600;
-  cursor: pointer;
 `
 
 export const IconText = styled.span`

@@ -173,3 +173,32 @@ export const GoodNews = styled.p`
   color: ${({ theme }) => theme.colors.success};
   font-weight: 600;
 `
+
+// ---------- Filters (All Submissions, My submissions) ----------
+
+// The filter dropdowns: as many columns as fit (at least 140px each), stretched to fill.
+export const FilterCard = styled(Card)`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  padding: 16px;
+`
+
+// "N forms" on the left, "Clear filters" on the right.
+export const ResultBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 32px;
+`
+
+export const ClearFiltersButton = styled.button`
+  padding: 4px 10px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radius};
+  background: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.brand};
+  font-weight: 600;
+  cursor: pointer;
+`

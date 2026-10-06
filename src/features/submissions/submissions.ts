@@ -1,6 +1,7 @@
 // Queries for reading submissions. Row Level Security decides which rows come back:
 // framers only get their own, admins get everyone's.
 import type { Enums } from '../../lib/database.types'
+import { checklistKeys, type ChecklistKey } from './checklist'
 import { PHOTO_BUCKET } from './photos'
 import { supabase } from '../../lib/supabase'
 
@@ -8,24 +9,70 @@ import { supabase } from '../../lib/supabase'
 // The bucket is private, so this is the only way to show a photo.
 const SIGNED_URL_SECONDS = 60 * 60
 
-// "My forms": the signed-in framer's submissions, newest first.
-export async function fetchMySubmissions(userId: string) {
-  const { data, error } = await supabase
+// Max rows in "My submissions"; filters narrow it down.
+export const MY_ROW_LIMIT = 100
+
+// "My submissions" filters, as the query needs them (dates already resolved).
+export type MySubmissionQuery = {
+  siteId?: string
+  status?: Enums<'submission_status'>
+  from?: string // 'YYYY-MM-DD', inclusive
+  to?: string // 'YYYY-MM-DD', inclusive
+  issue?: 'any' | ChecklistKey // 'any' = at least one "No"; a key = that item "No"
+}
+
+// The signed-in framer's submissions, filtered, newest first. Filtering happens in the
+// database (not in the browser), so it finds older forms too, beyond the row limit.
+export async function fetchMySubmissions(userId: string, filters: MySubmissionQuery = {}) {
+  let query = supabase
     .from('submissions')
     // `site:sites(name)` follows the site_id foreign key (a join) and names the result "site".
     // `submission_photos(count)` returns only the number of photos, not the rows.
     .select('*, site:sites(name), submission_photos(count)')
     // RLS already limits framers to their own rows; the filter makes the intent explicit.
     .eq('user_id', userId)
+
+  // Each filter is only added when it has a value.
+  if (filters.siteId) query = query.eq('site_id', filters.siteId)
+  if (filters.status) query = query.eq('status', filters.status)
+  if (filters.from) query = query.gte('work_date', filters.from)
+  if (filters.to) query = query.lte('work_date', filters.to)
+  if (filters.issue === 'any') {
+    // OR across the 8 columns: "ppe_hard_hat.eq.false,ppe_vest.eq.false,..."
+    query = query.or(checklistKeys.map((key) => `${key}.eq.false`).join(','))
+  } else if (filters.issue) {
+    query = query.eq(filters.issue, false)
+  }
+
+  const { data, error } = await query
     .order('work_date', { ascending: false })
     .order('created_at', { ascending: false })
-    .limit(100) // most recent 100 is plenty for a worker's history
+    .limit(MY_ROW_LIMIT)
 
   if (error) throw error
   return data
 }
 
 export type MySubmission = Awaited<ReturnType<typeof fetchMySubmissions>>[number]
+
+// Has this framer submitted a form dated today? For the daily reminder, which must not
+// depend on the list's filters. Count only, no rows.
+export async function fetchSubmittedToday(userId: string, today: string): Promise<boolean> {
+  const { count, error } = await supabase
+    .from('submissions')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('work_date', today)
+  if (error) throw error
+  return (count ?? 0) > 0
+}
+
+// Sites for the "Site" filter: all of them, inactive too (old forms are still history).
+export async function fetchSiteOptions() {
+  const { data, error } = await supabase.from('sites').select('id, name, is_active').order('name')
+  if (error) throw error
+  return data
+}
 
 // One submission with site, worker name and photos (with signed URLs).
 // Returns null if it doesn't exist or the user isn't allowed to see it

@@ -43,3 +43,16 @@ export function formatShortDate(isoDate: string): string {
   const [year, month, day] = isoDate.split('-').map(Number)
   return new Date(year, month - 1, day).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })
 }
+
+// Monday of the week that contains `isoDate` (weeks start on Monday, as on a work schedule).
+// getUTCDay(): 0 = Sunday ... 6 = Saturday, so Sunday goes back 6 days.
+export function startOfWeek(isoDate: string): string {
+  const [year, month, day] = isoDate.split('-').map(Number)
+  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay()
+  return addDays(isoDate, weekday === 0 ? -6 : 1 - weekday)
+}
+
+// First day of the month that contains `isoDate`, e.g. '2026-10-05' -> '2026-10-01'.
+export function startOfMonth(isoDate: string): string {
+  return `${isoDate.slice(0, 8)}01`
+}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { AlertTriangle, CheckCircle2, ClipboardList, Flag } from 'lucide-react'
 import { useAuth } from '../../auth/auth-context'
 import { FormsPerDayChart, HorizontalBarChart } from '../components/SummaryCharts'
@@ -14,12 +15,16 @@ import {
 } from '../../../components/ui'
 import { formatDate, todayInVancouver } from '../../../lib/dates'
 import { fetchMySummary, SUMMARY_DAYS, type MySummary } from '../summary'
+import type { ChecklistKey } from '../../submissions/checklist'
+import { mySubmissionsLink } from '../../submissions/myFilters'
 import { Container } from './PersonalDashboard.styles'
 
 // /dashboard (framer): the signed-in framer's own numbers, never anyone else's.
 // Same layout as the admin dashboard: tiles for today, charts for the last 14 days.
+// Every tile and chart bar opens My submissions with the matching filters (myFilters.ts).
 export function PersonalDashboard() {
   const { profile } = useAuth()
+  const navigate = useNavigate()
   const today = todayInVancouver()
   const [summary, setSummary] = useState<MySummary | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -50,26 +55,26 @@ export function PersonalDashboard() {
           <Tiles>
             {/* Not submitted yet: the tile goes straight to the form. */}
             <Tile
-              to={summary.submittedToday ? '/my-submissions' : '/my-submissions/new'}
+              to={summary.submittedToday ? mySubmissionsLink({ period: 'today' }) : '/my-submissions/new'}
               icon={summary.submittedToday ? CheckCircle2 : AlertTriangle}
               value={summary.submittedToday ? 'Yes' : 'No'}
               label="Submitted today"
               tone={summary.submittedToday ? 'success' : 'danger'}
             />
             <Tile
-              to="/my-submissions"
+              to={mySubmissionsLink({ period: 'recent' })}
               icon={ClipboardList}
               value={String(summary.formsCount)}
               label={`Forms, last ${SUMMARY_DAYS} days`}
             />
             <Tile
-              to="/my-submissions"
+              to={mySubmissionsLink({ period: 'recent', issue: 'any' })}
               icon={AlertTriangle}
               value={String(summary.issuesCount)}
               label={`Issues reported, last ${SUMMARY_DAYS} days`}
             />
             <Tile
-              to="/my-submissions"
+              to={mySubmissionsLink({ status: 'flagged' })}
               icon={Flag}
               value={String(summary.flaggedCount)}
               label="Flagged by an admin"
@@ -80,20 +85,35 @@ export function PersonalDashboard() {
           <PanelGrid>
             <Panel>
               <PanelTitle>My forms per day</PanelTitle>
-              <Hint>Last {SUMMARY_DAYS} days</Hint>
-              <FormsPerDayChart data={summary.perDay} />
+              <Hint>Last {SUMMARY_DAYS} days. Click a bar to see that day's forms.</Hint>
+              <FormsPerDayChart
+                data={summary.perDay}
+                // Days with no forms have nothing to show.
+                onBarClick={(day) => {
+                  if (day.forms > 0) navigate(mySubmissionsLink({ date: day.date }))
+                }}
+              />
             </Panel>
 
             <Panel>
               <PanelTitle>Issues by checklist item</PanelTitle>
-              <Hint>Times answered "No", last {SUMMARY_DAYS} days</Hint>
+              <Hint>Times answered "No", last {SUMMARY_DAYS} days. Click a bar to see those forms.</Hint>
               {/* An all-zero chart says nothing: show a clear message instead. */}
               {summary.issuesCount === 0 ? (
                 <GoodNews>
                   <CheckCircle2 size={18} aria-hidden="true" /> No issues reported.
                 </GoodNews>
               ) : (
-                <HorizontalBarChart data={summary.perItem} valueLabel="Times" />
+                <HorizontalBarChart
+                  data={summary.perItem}
+                  valueLabel="Times"
+                  onBarClick={(item) => {
+                    // id = the checklist item's key (see fetchMySummary).
+                    if (item.count > 0) {
+                      navigate(mySubmissionsLink({ period: 'recent', issue: item.id as ChecklistKey }))
+                    }
+                  }}
+                />
               )}
             </Panel>
           </PanelGrid>

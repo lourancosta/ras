@@ -1,10 +1,12 @@
 // Data for the dashboards: today's status and the last 14 days.
 // Loaded with a few small queries, then counted in the browser (the data is small).
 import { checklistGroups, countIssues } from '../submissions/checklist'
+import { RECENT_DAYS } from '../submissions/myFilters'
 import { addDays } from '../../lib/dates'
 import { supabase } from '../../lib/supabase'
 
-export const SUMMARY_DAYS = 14
+// Same window as the "Last 14 days" filter on My submissions, so dashboard links match.
+export const SUMMARY_DAYS = RECENT_DAYS
 
 export async function fetchSummary(today: string) {
   const since = addDays(today, -(SUMMARY_DAYS - 1)) // 14 days including today
@@ -120,6 +122,7 @@ export async function fetchMySummary(userId: string, today: string) {
   const perItem = checklistGroups
     .flatMap((group) => group.items)
     .map((item) => ({
+      id: item.key, // so a click on the bar can filter My submissions by this item
       name: item.label,
       count: recentList.filter((s) => !s[item.key]).length,
     }))
