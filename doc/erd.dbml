@@ -20,6 +20,8 @@ Table profiles {
   id uuid [pk, ref: - auth_users.id]
   full_name text [not null]
   role user_role [not null, default: 'framer']
+  email text [note: 'copy of the login email (0004)']
+  is_active boolean [not null, default: true, note: 'false = deactivated by an admin (0004)']
   created_at timestamptz
 }
 

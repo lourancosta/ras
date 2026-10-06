@@ -115,12 +115,12 @@ export async function fetchSubmissions(filters: SubmissionFilters) {
 
 export type AdminSubmission = Awaited<ReturnType<typeof fetchSubmissions>>[number]
 
-// Options for the filter dropdowns: every site (inactive too, for history)
-// and every framer.
+// Options for the filter dropdowns: every site and every framer, inactive ones too
+// (their old forms are still history).
 export async function fetchFilterOptions() {
   const [sites, workers] = await Promise.all([
     supabase.from('sites').select('id, name, is_active').order('name'),
-    supabase.from('profiles').select('id, full_name').eq('role', 'framer').order('full_name'),
+    supabase.from('profiles').select('id, full_name, is_active').eq('role', 'framer').order('full_name'),
   ])
   if (sites.error) throw sites.error
   if (workers.error) throw workers.error

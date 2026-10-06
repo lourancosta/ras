@@ -24,5 +24,16 @@ export function RequireAuth() {
     )
   }
 
+  // Deactivated by an admin (Settings > Workers). The database also blocks new forms
+  // and photos for inactive users (0004_workers.sql); this just explains why.
+  if (!profile.is_active) {
+    return (
+      <FullPageMessage>
+        <p>Your account is inactive. Please contact an admin.</p>
+        <Button onClick={signOut}>Sign out</Button>
+      </FullPageMessage>
+    )
+  }
+
   return <Outlet />
 }

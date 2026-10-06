@@ -12,18 +12,24 @@ export type Database = {
           id: string
           full_name: string
           role: Database['public']['Enums']['user_role']
+          email: string | null
+          is_active: boolean
           created_at: string
         }
         Insert: {
           id: string
           full_name: string
           role?: Database['public']['Enums']['user_role']
+          email?: string | null
+          is_active?: boolean
           created_at?: string
         }
         Update: {
           id?: string
           full_name?: string
           role?: Database['public']['Enums']['user_role']
+          email?: string | null
+          is_active?: boolean
           created_at?: string
         }
         Relationships: []
@@ -175,6 +181,10 @@ export type Database = {
     }
     Functions: {
       is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_active_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }

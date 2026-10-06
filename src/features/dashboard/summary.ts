@@ -10,7 +10,7 @@ export async function fetchSummary(today: string) {
   const since = addDays(today, -(SUMMARY_DAYS - 1)) // 14 days including today
 
   const [framers, sites, recent, pending, flagged] = await Promise.all([
-    supabase.from('profiles').select('id, full_name').eq('role', 'framer').order('full_name'),
+    supabase.from('profiles').select('id, full_name, is_active').eq('role', 'framer').order('full_name'),
     supabase.from('sites').select('id, name, is_active').order('name'),
     supabase
       .from('submissions')
@@ -35,7 +35,9 @@ export async function fetchSummary(today: string) {
   const todays = recentList.filter((s) => s.work_date === today)
   const submittedTodayIds = new Set(todays.map((s) => s.user_id))
   // Assumption: every framer is expected to submit every working day.
-  const notSubmittedToday = framerList.filter((f) => !submittedTodayIds.has(f.id))
+  // Inactive framers aren't expected to submit (but their forms still count below).
+  const activeFramers = framerList.filter((f) => f.is_active)
+  const notSubmittedToday = activeFramers.filter((f) => !submittedTodayIds.has(f.id))
 
   // Who submitted today, grouped by site (a framer on two sites appears under both).
   const todayBySite = siteList
@@ -67,8 +69,9 @@ export async function fetchSummary(today: string) {
   })
 
   return {
-    framerCount: framerList.length,
-    submittedTodayCount: submittedTodayIds.size,
+    framerCount: activeFramers.length,
+    // Active framers only, to match framerCount ("3 / 6 workers submitted today").
+    submittedTodayCount: activeFramers.length - notSubmittedToday.length,
     notSubmittedToday,
     todayBySite,
     pendingCount: pending.count ?? 0,

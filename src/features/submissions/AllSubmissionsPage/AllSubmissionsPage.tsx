@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { AlertTriangle, Camera, CheckCircle2 } from 'lucide-react'
+import { DataTable, type Column } from '../../../components/DataTable/DataTable'
 import { StatusBadge } from '../components/StatusBadge/StatusBadge'
 import { ErrorMessage, Field, Hint, Input, PageTitle, Select } from '../../../components/ui'
 import { countIssues } from '../checklist'
@@ -14,19 +15,7 @@ import {
   type FilterOptions,
   type SubmissionFilters,
 } from '../submissions'
-import {
-  Container,
-  Filters,
-  ResultBar,
-  ClearButton,
-  TableCard,
-  TableScroll,
-  Table,
-  ClickableRow,
-  IconText,
-  Ok,
-  Issue,
-} from './AllSubmissionsPage.styles'
+import { Container, Filters, ResultBar, ClearButton, IconText, Ok, Issue } from './AllSubmissionsPage.styles'
 
 const STATUSES: Enums<'submission_status'>[] = ['submitted', 'reviewed', 'flagged']
 const STATUS_LABELS: Record<Enums<'submission_status'>, string> = {
@@ -34,6 +23,44 @@ const STATUS_LABELS: Record<Enums<'submission_status'>, string> = {
   reviewed: 'Reviewed',
   flagged: 'Flagged',
 }
+
+// Table columns. Each cell is drawn from one row (a submission with its worker, site
+// and photo count).
+const columns: Column<AdminSubmission>[] = [
+  { header: 'Worker', cell: (row) => row.worker?.full_name },
+  { header: 'Site', cell: (row) => row.site?.name },
+  {
+    header: 'Checklist',
+    cell: (row) => {
+      const issues = countIssues(row)
+      return issues === 0 ? (
+        <Ok>
+          <CheckCircle2 size={16} aria-hidden="true" /> OK
+        </Ok>
+      ) : (
+        <Issue>
+          <AlertTriangle size={16} aria-hidden="true" /> {issues} issue{issues > 1 ? 's' : ''}
+        </Issue>
+      )
+    },
+  },
+  {
+    header: 'Photos',
+    cell: (row) => {
+      // `submission_photos(count)` comes back as [{ count: n }].
+      const photoCount = row.submission_photos[0]?.count ?? 0
+      return (
+        photoCount > 0 && (
+          <IconText>
+            <Camera size={16} aria-hidden="true" /> {photoCount}
+          </IconText>
+        )
+      )
+    },
+  },
+  { header: 'Status', cell: (row) => <StatusBadge status={row.status} /> },
+  { header: 'Date', cell: (row) => formatDate(row.work_date) },
+]
 
 // Outcome of one load, tagged with the filters it was for (see `loading` below).
 type Result = { key: string; rows: AdminSubmission[]; error: string | null }
@@ -136,6 +163,7 @@ export function AllSubmissionsPage() {
             {options?.workers.map((worker) => (
               <option key={worker.id} value={worker.id}>
                 {worker.full_name}
+                {worker.is_active ? '' : ' (inactive)'}
               </option>
             ))}
           </Select>
@@ -182,75 +210,16 @@ export function AllSubmissionsPage() {
       {optionsError && <ErrorMessage>{optionsError}</ErrorMessage>}
       {error && <ErrorMessage>{error}</ErrorMessage>}
 
-      <TableCard>
-        {/* Wide table: scrolls sideways on small screens instead of squashing. */}
-        <TableScroll>
-          <Table>
-            <thead>
-              <tr>
-                <th>Worker</th>
-                <th>Site</th>
-                <th>Checklist</th>
-                <th>Photos</th>
-                <th>Status</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {!loading && !error && rows.length === 0 && (
-                <tr>
-                  <td colSpan={6}>
-                    <Hint>No forms match these filters.</Hint>
-                  </td>
-                </tr>
-              )}
-              {rows.map((row) => {
-                const issues = countIssues(row)
-                const photoCount = row.submission_photos[0]?.count ?? 0
-                return (
-                  // The whole row opens the form. A <tr> can't be a link, so it gets
-                  // onClick + tabIndex/onKeyDown to also work with the keyboard (Tab, Enter).
-                  <ClickableRow
-                    key={row.id}
-                    onClick={() => openSubmission(row.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') openSubmission(row.id)
-                    }}
-                    tabIndex={0}
-                    aria-label={`Open form: ${row.worker?.full_name}, ${row.site?.name}, ${formatDate(row.work_date)}`}
-                  >
-                    <td>{row.worker?.full_name}</td>
-                    <td>{row.site?.name}</td>
-                    <td>
-                      {issues === 0 ? (
-                        <Ok>
-                          <CheckCircle2 size={16} aria-hidden="true" /> OK
-                        </Ok>
-                      ) : (
-                        <Issue>
-                          <AlertTriangle size={16} aria-hidden="true" /> {issues} issue
-                          {issues > 1 ? 's' : ''}
-                        </Issue>
-                      )}
-                    </td>
-                    <td>
-                      {photoCount > 0 && (
-                        <IconText>
-                          <Camera size={16} aria-hidden="true" /> {photoCount}
-                        </IconText>
-                      )}
-                    </td>
-                    <td>
-                      <StatusBadge status={row.status} />
-                    </td>
-                    <td>{formatDate(row.work_date)}</td>
-                  </ClickableRow>
-                )
-              })}
-            </tbody>
-          </Table>
-        </TableScroll>
-      </TableCard>
+      <DataTable
+        columns={columns}
+        rows={rows}
+        rowKey={(row) => row.id}
+        onRowClick={(row) => openSubmission(row.id)}
+        rowLabel={(row) =>
+          `Open form: ${row.worker?.full_name}, ${row.site?.name}, ${formatDate(row.work_date)}`
+        }
+        emptyMessage={!loading && !error ? 'No forms match these filters.' : undefined}
+      />
     </Container>
   )
 }
