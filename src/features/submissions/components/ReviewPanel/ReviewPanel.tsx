@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { useAuth } from '../../../auth/auth-context'
-import type { Enums } from '../../../../lib/database.types'
 import { reviewSubmission } from '../../submissions'
 import { ButtonPair, ErrorMessage, Hint, SuccessMessage } from '../../../../components/ui'
-import { DecisionButtons, type ReviewDecision } from '../DecisionButtons/DecisionButtons'
+import { DecisionButtons } from '../DecisionButtons/DecisionButtons'
+import type { ReviewDecision, Status } from '../../status'
 import { Panel, Row, Text, Title } from './ReviewPanel.styles'
 
 type ReviewStatus = ReviewDecision
 
 // What changed, so the parent can update the page without reloading.
 export type ReviewUpdate = {
-  status: Enums<'submission_status'>
+  status: Status
   reviewed_by: string | null
   reviewed_at: string | null
   reviewerName: string
@@ -18,7 +18,7 @@ export type ReviewUpdate = {
 
 type ReviewPanelProps = {
   submissionId: string
-  status: Enums<'submission_status'>
+  status: Status
   onReviewed: (update: ReviewUpdate) => void
 }
 

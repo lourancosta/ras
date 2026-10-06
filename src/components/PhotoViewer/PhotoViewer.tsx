@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useState, type KeyboardEvent } from 'react'
+import { useDialog } from '../../lib/useDialog'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { Counter, Dialog, IconButton, SideButton, Stage, TopBar } from './PhotoViewer.styles'
 
@@ -10,24 +11,16 @@ type PhotoViewerProps = {
 
 // Full-screen dark viewer for a form's photos, with Previous / Next.
 // Render it only while open (like Modal): {viewing !== null && <PhotoViewer ... />}.
-// Native <dialog> + showModal(): focus kept inside, Escape closes, page behind not clickable.
-// It also works on top of the review queue modal (a dialog can open over another one).
+// Native <dialog> + showModal() via useDialog: focus kept inside, Escape closes, and it
+// can open on top of another dialog (the review queue modal).
 // Keyboard: ← / → change photo.
 export function PhotoViewer({ photos, startIndex, onClose }: PhotoViewerProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null)
+  const dialog = useDialog(onClose)
   const [index, setIndex] = useState(startIndex)
   const total = photos.length
   const photo = photos[index]
   const isFirst = index === 0
   const isLast = index === total - 1
-
-  // Open when it appears, close when it goes away (DOM calls, no setState).
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-    dialog.showModal()
-    return () => dialog.close()
-  }, [])
 
   function handleKeyDown(event: KeyboardEvent) {
     if (event.key === 'ArrowLeft' && !isFirst) setIndex(index - 1)
@@ -35,16 +28,7 @@ export function PhotoViewer({ photos, startIndex, onClose }: PhotoViewerProps) {
   }
 
   return (
-    <Dialog
-      ref={dialogRef}
-      aria-label={`Photo ${index + 1} of ${total}`}
-      onKeyDown={handleKeyDown}
-      // Escape: let the parent decide (it unmounts us) instead of the browser closing it.
-      onCancel={(event) => {
-        event.preventDefault()
-        onClose()
-      }}
-    >
+    <Dialog {...dialog} aria-label={`Photo ${index + 1} of ${total}`} onKeyDown={handleKeyDown}>
       <TopBar>
         {/* aria-live: screen readers announce the new position after Previous / Next. */}
         <Counter aria-live="polite">

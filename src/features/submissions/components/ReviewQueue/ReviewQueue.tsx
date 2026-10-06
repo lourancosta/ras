@@ -4,7 +4,8 @@ import { Modal } from '../../../../components/Modal/Modal'
 import { Button, ButtonPair, ErrorMessage, Hint, SecondaryButton, SuccessMessage } from '../../../../components/ui'
 import { useAuth } from '../../../auth/auth-context'
 import { reviewSubmission } from '../../submissions'
-import { DecisionButtons, type ReviewDecision } from '../DecisionButtons/DecisionButtons'
+import { DecisionButtons } from '../DecisionButtons/DecisionButtons'
+import { STATUS_LABELS, type ReviewDecision } from '../../status'
 import { SubmissionDetail } from '../SubmissionDetail/SubmissionDetail'
 import {
   ActionsFooter,
@@ -31,8 +32,6 @@ type ReviewQueueProps = {
   onReviewed: (review: QueueReview) => void
   onClose: () => void
 }
-
-const DECISION_LABELS: Record<Decision, string> = { reviewed: 'Reviewed', flagged: 'Flagged' }
 
 // Review pending forms one by one in a modal: the full form (same view as the detail
 // page), "3 / 8", Flag / Review to save a decision (you stay on the form, the chosen
@@ -144,7 +143,7 @@ export function ReviewQueue({ ids, onReviewed, onClose }: ReviewQueueProps) {
           <Counter aria-live="polite">
             {index + 1} / {total}
           </Counter>
-          {saved && <Hint>Saved in this queue as {DECISION_LABELS[saved]}</Hint>}
+          {saved && <Hint>Saved in this queue as {STATUS_LABELS[saved]}</Hint>}
         </Progress>
         <Track aria-hidden="true">
           <Fill $percent={((index + 1) / total) * 100} />

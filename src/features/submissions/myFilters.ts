@@ -2,9 +2,9 @@
 //   /my-submissions?site=<id>&status=flagged&period=week&issue=any
 // One place for the rules, used by the page (to read them) and by the framer's
 // dashboard (to build links), so a dashboard click always lands on matching filters.
-import type { Enums } from '../../lib/database.types'
 import { addDays, startOfMonth, startOfWeek } from '../../lib/dates'
 import { checklistKeys, type ChecklistKey } from './checklist'
+import { parseStatus, type Status } from './status'
 
 // "Last 14 days" matches the framer dashboard's tiles and charts (summary.ts uses this too).
 export const RECENT_DAYS = 14
@@ -20,9 +20,6 @@ export const DATE_PRESET_LABELS: Record<DatePreset, string> = {
 
 // 'any' = at least one checklist item answered "No"; a key = that item answered "No".
 export type IssueFilter = 'any' | ChecklistKey
-
-type Status = Enums<'submission_status'>
-const STATUSES: Status[] = ['submitted', 'reviewed', 'flagged']
 
 export type MyFilters = {
   siteId?: string
@@ -42,7 +39,7 @@ export function parseMyFilters(params: URLSearchParams): MyFilters {
   const issue = params.get('issue')
   return {
     siteId: params.get('site') || undefined,
-    status: STATUSES.find((s) => s === status),
+    status: parseStatus(status),
     period: DATE_PRESETS.find((p) => p === period),
     date: date && DATE_PATTERN.test(date) ? date : undefined,
     issue: issue === 'any' ? 'any' : checklistKeys.find((key) => key === issue),

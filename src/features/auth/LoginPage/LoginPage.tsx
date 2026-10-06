@@ -2,12 +2,11 @@ import { useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router'
 import { homePathFor } from '../../../routes'
 import { useAuth } from '../auth-context'
-import { supabase } from '../../../lib/supabase'
 import { Button, ErrorMessage, Field, Input } from '../../../components/ui'
 import { Page, LoginCard, Title, Subtitle } from './LoginPage.styles'
 
 export function LoginPage() {
-  const { session, profile, loading } = useAuth()
+  const { session, profile, loading, signIn } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -18,10 +17,7 @@ export function LoginPage() {
     setError(null)
     setSubmitting(true)
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    })
+    const error = await signIn(email, password)
 
     setSubmitting(false)
     if (error) {

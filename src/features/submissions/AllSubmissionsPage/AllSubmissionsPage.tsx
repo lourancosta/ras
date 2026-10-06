@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router'
+import { useNavigate } from 'react-router'
 import { DataTable, type Column } from '../../../components/DataTable/DataTable'
 import { FilterPanel } from '../../../components/FilterPanel/FilterPanel'
 import { ReviewQueue, type QueueReview } from '../components/ReviewQueue/ReviewQueue'
 import { StatusBadge } from '../components/StatusBadge/StatusBadge'
+import { StatusSelect } from '../components/StatusSelect/StatusSelect'
+import { parseStatus } from '../status'
 import { ChecklistResult, PhotoCount } from '../components/SubmissionCells/SubmissionCells'
 import { ListChecks } from 'lucide-react'
 import {
@@ -19,8 +21,8 @@ import {
   ResultBar,
   Select,
 } from '../../../components/ui'
-import type { Enums } from '../../../lib/database.types'
 import { useAsync } from '../../../lib/useAsync'
+import { useUrlFilters } from '../../../lib/useUrlFilters'
 import { formatDate } from '../../../lib/dates'
 import {
   ADMIN_ROW_LIMIT,
@@ -30,13 +32,6 @@ import {
   type AdminSubmission,
   type SubmissionFilters,
 } from '../submissions'
-
-const STATUSES: Enums<'submission_status'>[] = ['submitted', 'reviewed', 'flagged']
-const STATUS_LABELS: Record<Enums<'submission_status'>, string> = {
-  submitted: 'Pending review',
-  reviewed: 'Reviewed',
-  flagged: 'Flagged',
-}
 
 // Columns (table on wide screens). `card` = where each one goes on a phone card;
 // unmarked columns are the card's detail line.
@@ -57,20 +52,16 @@ const columns: Column<AdminSubmission>[] = [
 
 // /submissions ("All Submissions"): every submitted form in a filterable table.
 export function AllSubmissionsPage() {
-  // Filters live in the URL (?site=..&worker=..&status=..&from=..&to=..):
-  // they survive a refresh, work with Back, and the link can be shared.
-  const [searchParams, setSearchParams] = useSearchParams()
+  // Filters live in the URL (?site=..&worker=..&status=..&from=..&to=..), see useUrlFilters.
+  const { params, key: filterKey, hasFilters, activeCount, listUrl, setFilter, clear } = useUrlFilters()
   const navigate = useNavigate()
-  const statusParam = searchParams.get('status')
   const filters: SubmissionFilters = {
-    siteId: searchParams.get('site') ?? undefined,
-    workerId: searchParams.get('worker') ?? undefined,
-    // Only accept a known status (a typo in the URL is ignored, not sent to the DB).
-    status: STATUSES.find((s) => s === statusParam),
-    from: searchParams.get('from') ?? undefined,
-    to: searchParams.get('to') ?? undefined,
+    siteId: params.get('site') ?? undefined,
+    workerId: params.get('worker') ?? undefined,
+    status: parseStatus(params.get('status')), // unknown values are ignored
+    from: params.get('from') ?? undefined,
+    to: params.get('to') ?? undefined,
   }
-  const filterKey = searchParams.toString()
 
   // The review queue's forms (ids), fixed when it opens; null = closed.
   const [queueIds, setQueueIds] = useState<string[] | null>(null)
@@ -94,16 +85,6 @@ export function AllSubmissionsPage() {
   const { siteId, workerId, from, to } = filters
   const invalidRange = !!from && !!to && from > to
 
-  // Set or remove one URL parameter, keeping the others.
-  function setFilter(name: string, value: string) {
-    const next = new URLSearchParams(searchParams)
-    if (value) next.set(name, value)
-    else next.delete(name)
-    setSearchParams(next, { replace: true })
-  }
-
-  const hasFilters = filterKey !== ''
-
   // Review queue: the pending forms in the current list (so it follows the filters),
   // oldest first, the usual order for working through a backlog.
   const pending = rows
@@ -119,7 +100,7 @@ export function AllSubmissionsPage() {
   // Opens a form. state.back = this page's URL with its filters, so the detail
   // page's "Back to all submissions" returns to the same filtered list.
   function openSubmission(id: string) {
-    navigate(`/submissions/${id}`, { state: { back: `/submissions${hasFilters ? `?${filterKey}` : ''}` } })
+    navigate(`/submissions/${id}`, { state: { back: listUrl } })
   }
 
   return (
@@ -127,7 +108,7 @@ export function AllSubmissionsPage() {
       <PageTitle>All Submissions</PageTitle>
 
       {/* activeCount: one per filter set in the URL ("Show filters (2)" on phones). */}
-      <FilterPanel activeCount={[...searchParams.keys()].length}>
+      <FilterPanel activeCount={activeCount}>
         <Field>
           Site
           <Select value={siteId ?? ''} onChange={(e) => setFilter('site', e.target.value)}>
@@ -156,14 +137,7 @@ export function AllSubmissionsPage() {
 
         <Field>
           Status
-          <Select value={status ?? ''} onChange={(e) => setFilter('status', e.target.value)}>
-            <option value="">All statuses</option>
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {STATUS_LABELS[s]}
-              </option>
-            ))}
-          </Select>
+          <StatusSelect value={filters.status} onChange={(value) => setFilter('status', value)} />
         </Field>
 
         <Field>
@@ -193,7 +167,7 @@ export function AllSubmissionsPage() {
         </Hint>
         <ResultActions>
           {hasFilters && (
-            <ClearFiltersButton type="button" onClick={() => setSearchParams({}, { replace: true })}>
+            <ClearFiltersButton type="button" onClick={clear}>
               Clear filters
             </ClearFiltersButton>
           )}

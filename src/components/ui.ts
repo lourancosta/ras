@@ -1,13 +1,13 @@
 // Small shared building blocks so forms look the same everywhere.
-import { Link } from 'react-router'
-import styled, { css } from 'styled-components'
+import { Link } from "react-router";
+import styled, { css } from "styled-components";
 
 export const Card = styled.div`
   background: ${({ theme }) => theme.colors.surface};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radius};
   padding: 24px;
-`
+`;
 
 export const Field = styled.label`
   display: flex;
@@ -15,7 +15,7 @@ export const Field = styled.label`
   gap: 6px;
   min-width: 0; /* lets the field shrink to its grid / flex column instead of overflowing */
   font-weight: 600;
-`
+`;
 
 // Shared by Input, Select and Textarea.
 const fieldStyles = css`
@@ -32,7 +32,7 @@ const fieldStyles = css`
     outline: 2px solid ${({ theme }) => theme.colors.accent};
     outline-offset: 1px;
   }
-`
+`;
 
 export const Input = styled.input`
   ${fieldStyles}
@@ -41,34 +41,34 @@ export const Input = styled.input`
      appearance: none removes that; min-height keeps the height of an empty one (iOS would
      shrink it), and the value is aligned left like the other fields. */
   @media (max-width: calc(${({ theme }) => theme.breakpoints.md} - 1px)) {
-    &[type='date'] {
+    &[type="date"] {
       appearance: none;
       -webkit-appearance: none;
       min-height: 44px;
     }
 
-    &[type='date']::-webkit-date-and-time-value {
+    &[type="date"]::-webkit-date-and-time-value {
       text-align: left;
     }
   }
-`
+`;
 
 export const Select = styled.select`
   ${fieldStyles}
-`
+`;
 
 export const Textarea = styled.textarea`
   ${fieldStyles}
   min-height: 100px;
   resize: vertical;
-`
+`;
 
 // Small grey helper text under a title or field.
 export const Hint = styled.span`
   font-size: 0.85rem;
   font-weight: 400;
   color: ${({ theme }) => theme.colors.muted};
-`
+`;
 
 // One size for every button with a text label (Button, SecondaryButton, Clear filters,
 // the photo picker's Take photo / Choose photos), so they all have the same height:
@@ -85,7 +85,7 @@ export const buttonSize = css`
     height: 16px;
     flex-shrink: 0;
   }
-`
+`;
 
 // Also used as a link: <Button as={Link} to="/">, hence the flex/text-decoration rules.
 export const Button = styled.button`
@@ -110,7 +110,7 @@ export const Button = styled.button`
     outline: 2px solid ${({ theme }) => theme.colors.accent};
     outline-offset: 2px;
   }
-`
+`;
 
 // Two buttons side by side (e.g. Flag / Review, Previous / Next).
 // Phones: centred, 45% of the width each. Wide screens: natural width, from the left.
@@ -130,50 +130,50 @@ export const ButtonPair = styled.div`
       flex: 0 0 auto;
     }
   }
-`
+`;
 
 // Outlined version of Button, for the less important action (Cancel, "Submit another").
 export const SecondaryButton = styled(Button)`
   background: transparent;
   color: ${({ theme }) => theme.colors.brand};
   border: 1px solid ${({ theme }) => theme.colors.brand};
-`
+`;
 
 // Small rounded label, e.g. Active / Inactive in the settings tables.
-export const Pill = styled.span<{ $tone: 'success' | 'muted' }>`
+export const Pill = styled.span<{ $tone: "success" | "muted" }>`
   display: inline-block;
   padding: 2px 10px;
   border-radius: 999px;
   font-size: 0.8rem;
   font-weight: 600;
-  background: ${({ theme, $tone }) => ($tone === 'success' ? theme.colors.successBg : theme.colors.bg)};
-  color: ${({ theme, $tone }) => ($tone === 'success' ? theme.colors.success : theme.colors.muted)};
-  border: 1px solid ${({ theme, $tone }) => ($tone === 'success' ? 'transparent' : theme.colors.border)};
-`
+  background: ${({ theme, $tone }) => ($tone === "success" ? theme.colors.successBg : theme.colors.bg)};
+  color: ${({ theme, $tone }) => ($tone === "success" ? theme.colors.success : theme.colors.muted)};
+  border: 1px solid ${({ theme, $tone }) => ($tone === "success" ? "transparent" : theme.colors.border)};
+`;
 
 // role="alert" makes screen readers announce the message when it appears.
-export const ErrorMessage = styled.p.attrs({ role: 'alert' })`
+export const ErrorMessage = styled.p.attrs({ role: "alert" })`
   margin: 0;
   padding: 10px 12px;
   border-radius: ${({ theme }) => theme.radius};
   background: ${({ theme }) => theme.colors.dangerBg};
   color: ${({ theme }) => theme.colors.danger};
-`
+`;
 
 // role="status" is announced politely by screen readers (no interruption).
-export const SuccessMessage = styled.p.attrs({ role: 'status' })`
+export const SuccessMessage = styled.p.attrs({ role: "status" })`
   margin: 0;
   padding: 10px 12px;
   border-radius: ${({ theme }) => theme.radius};
   background: ${({ theme }) => theme.colors.successBg};
   color: ${({ theme }) => theme.colors.success};
-`
+`;
 
 export const PageTitle = styled.h1`
   margin: 0 0 16px;
   font-size: 1.5rem;
   color: ${({ theme }) => theme.colors.brand};
-`
+`;
 
 // "← Back to ..." link at the top of a page.
 export const BackLink = styled(Link)`
@@ -188,7 +188,7 @@ export const BackLink = styled(Link)`
   &:hover {
     text-decoration: underline;
   }
-`
+`;
 
 // ---------- Dashboard panels (admin and framer dashboards) ----------
 
@@ -201,7 +201,7 @@ export const PanelGrid = styled.div`
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-`
+`;
 
 export const Panel = styled(Card)`
   display: flex;
@@ -209,13 +209,13 @@ export const Panel = styled(Card)`
   gap: 8px;
   padding: 16px;
   min-width: 0; /* lets the chart shrink with the card */
-`
+`;
 
 export const PanelTitle = styled.h2`
   margin: 0;
   font-size: 1.05rem;
   color: ${({ theme }) => theme.colors.brand};
-`
+`;
 
 // Green line with a check icon, e.g. "Everyone has submitted today."
 export const GoodNews = styled.p`
@@ -225,7 +225,7 @@ export const GoodNews = styled.p`
   margin: 0;
   color: ${({ theme }) => theme.colors.success};
   font-weight: 600;
-`
+`;
 
 // ---------- List pages (All Submissions, My submissions, Job sites, Workers) ----------
 
@@ -242,7 +242,7 @@ export const ListPage = styled.div`
     height: calc(100vh - 2 * ${({ theme }) => theme.pagePaddingDesktop});
     height: calc(100dvh - 2 * ${({ theme }) => theme.pagePaddingDesktop}); /* dvh: correct on tablets with toolbars */
   }
-`
+`;
 
 // Title on the left, the page's main button on the right (wraps under it if there's no room).
 export const PageHeader = styled.div`
@@ -255,7 +255,7 @@ export const PageHeader = styled.div`
   h1 {
     margin: 0; /* the page's gap already spaces it */
   }
-`
+`;
 
 // ---------- Filters (All Submissions, My submissions) ----------
 
@@ -266,7 +266,7 @@ export const FilterCard = styled(Card)`
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 12px;
   padding: 16px;
-`
+`;
 
 // "N forms" on the left, "Clear filters" on the right.
 export const ResultBar = styled.div`
@@ -275,7 +275,7 @@ export const ResultBar = styled.div`
   justify-content: space-between;
   gap: 12px;
   min-height: 32px;
-`
+`;
 
 // Right side of the ResultBar: "Clear filters", "Review queue"...
 export const ResultActions = styled.div`
@@ -284,7 +284,7 @@ export const ResultActions = styled.div`
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-`
+`;
 
 export const ClearFiltersButton = styled.button`
   ${buttonSize}
@@ -294,4 +294,4 @@ export const ClearFiltersButton = styled.button`
   color: ${({ theme }) => theme.colors.brand};
   font-weight: 600;
   cursor: pointer;
-`
+`;

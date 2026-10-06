@@ -1,9 +1,6 @@
 import { CheckCircle2, Flag } from 'lucide-react'
-import type { Enums } from '../../../../lib/database.types'
+import { STATUS_LABELS, type ReviewDecision } from '../../status'
 import { DecisionButton } from './DecisionButtons.styles'
-
-// A review decision: every status except 'submitted' (pending).
-export type ReviewDecision = Exclude<Enums<'submission_status'>, 'submitted'>
 
 type DecisionButtonsProps = {
   selected: ReviewDecision | undefined // the saved decision; undefined = none yet (pending)
@@ -34,7 +31,7 @@ export function DecisionButtons({ selected, saving, onChoose }: DecisionButtonsP
         disabled={busy}
       >
         <Flag size={18} aria-hidden="true" />
-        {saving === 'flagged' ? 'Saving…' : selected === 'flagged' ? 'Flagged' : 'Flag'}
+        {saving === 'flagged' ? 'Saving…' : selected === 'flagged' ? STATUS_LABELS.flagged : 'Flag'}
       </DecisionButton>
       <DecisionButton
         type="button"
@@ -45,7 +42,7 @@ export function DecisionButtons({ selected, saving, onChoose }: DecisionButtonsP
         disabled={busy}
       >
         <CheckCircle2 size={18} aria-hidden="true" />
-        {saving === 'reviewed' ? 'Saving…' : selected === 'reviewed' ? 'Reviewed' : 'Review'}
+        {saving === 'reviewed' ? 'Saving…' : selected === 'reviewed' ? STATUS_LABELS.reviewed : 'Review'}
       </DecisionButton>
     </>
   )

@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { Session } from '@supabase/supabase-js'
+import type { AuthError, Session } from '@supabase/supabase-js'
 import type { Tables } from '../../lib/database.types'
 
 export type Profile = Tables<'profiles'>
@@ -11,6 +11,8 @@ export type AuthState = {
   loading: boolean
   // Set if the user is signed in but their profile couldn't be loaded.
   profileError: string | null
+  // Returns the error (null = signed in), so the login page can pick the message.
+  signIn: (email: string, password: string) => Promise<AuthError | null>
   signOut: () => Promise<void>
 }
 

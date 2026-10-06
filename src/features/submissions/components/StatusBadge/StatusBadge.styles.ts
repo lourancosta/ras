@@ -1,7 +1,7 @@
 import styled, { css } from 'styled-components'
-import type { Enums } from '../../../../lib/database.types'
+import type { Status } from '../../status'
 
-export const Badge = styled.span<{ $status: Enums<'submission_status'> }>`
+export const Badge = styled.span<{ $status: Status }>`
   display: inline-block;
   padding: 2px 10px;
   border-radius: 999px;

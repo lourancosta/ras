@@ -1,7 +1,7 @@
 // Queries for reading submissions. Row Level Security decides which rows come back:
 // framers only get their own, admins get everyone's.
-import type { Enums } from '../../lib/database.types'
-import { checklistKeys, type ChecklistKey } from './checklist'
+import type { ReviewDecision, Status } from './status'
+import { checklistKeys, type ChecklistAnswers, type ChecklistKey } from './checklist'
 import { PHOTO_BUCKET } from './photos'
 import { supabase } from '../../lib/supabase'
 
@@ -14,13 +14,42 @@ export function photoCountOf(photos: { count: number }[]): number {
   return photos[0]?.count ?? 0
 }
 
+// What the new form sends (the framer's own id comes from their profile).
+export type NewSubmission = {
+  userId: string
+  siteId: string
+  workDate: string // 'YYYY-MM-DD'
+  checklist: ChecklistAnswers
+  notes: string
+}
+
+// Saves a new safety form and returns its id (needed for the photo paths).
+// Throws the PostgrestError, so the page can turn its code into a clear message
+// (23505 = already submitted for this site and date, 42501 = rejected by RLS).
+export async function createSubmission(input: NewSubmission): Promise<string> {
+  const { data, error } = await supabase
+    .from('submissions')
+    .insert({
+      user_id: input.userId,
+      site_id: input.siteId,
+      work_date: input.workDate,
+      ...input.checklist, // the 8 boolean columns
+      notes: input.notes.trim() || null,
+      // status, reviewed_by and reviewed_at use the DB defaults.
+    })
+    .select('id')
+    .single()
+  if (error) throw error
+  return data.id
+}
+
 // Max rows in "My submissions"; filters narrow it down.
 export const MY_ROW_LIMIT = 100
 
 // "My submissions" filters, as the query needs them (dates already resolved).
 export type MySubmissionQuery = {
   siteId?: string
-  status?: Enums<'submission_status'>
+  status?: Status
   from?: string // 'YYYY-MM-DD', inclusive
   to?: string // 'YYYY-MM-DD', inclusive
   issue?: 'any' | ChecklistKey // 'any' = at least one "No"; a key = that item "No"
@@ -136,7 +165,7 @@ export type SubmissionDetailData = NonNullable<Awaited<ReturnType<typeof fetchSu
 export type SubmissionFilters = {
   siteId?: string
   workerId?: string
-  status?: Enums<'submission_status'>
+  status?: Status
   from?: string // 'YYYY-MM-DD', inclusive
   to?: string // 'YYYY-MM-DD', inclusive
 }
@@ -190,7 +219,7 @@ export type FilterOptions = Awaited<ReturnType<typeof fetchFilterOptions>>
 // grant in 0002/0003), and RLS rejects the update for anyone who isn't an admin.
 export async function reviewSubmission(
   id: string,
-  status: Exclude<Enums<'submission_status'>, 'submitted'>,
+  status: ReviewDecision,
   reviewerId: string,
 ) {
   const { data, error } = await supabase

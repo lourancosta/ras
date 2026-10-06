@@ -21,9 +21,8 @@ import {
 import { checklistGroups, emptyChecklist, type ChecklistAnswers } from '../checklist'
 import { formatDate, todayInVancouver } from '../../../lib/dates'
 import { MAX_PHOTOS, preparePhotos, uploadSubmissionPhotos, type SelectedPhoto } from '../photos'
-import { supabase } from '../../../lib/supabase'
 import { useAsync } from '../../../lib/useAsync'
-import { fetchActiveSites } from '../submissions'
+import { createSubmission, fetchActiveSites } from '../submissions'
 import { Container, Form, Section, SectionTitle, Actions } from './NewSubmissionPage.styles'
 
 const NOTES_MAX_LENGTH = 2000 // same limit as the DB check constraint
@@ -119,30 +118,20 @@ export function NewSubmissionPage() {
 
     // 1. Save the form and get its id back (needed for the photo paths).
     setSubmitStep('saving')
-    const { data: submission, error } = await supabase
-      .from('submissions')
-      .insert({
-        user_id: profile.id,
-        site_id: siteId,
-        work_date: workDate,
-        ...checklist, // the 8 boolean columns
-        notes: notes.trim() || null,
-        // status, reviewed_by and reviewed_at use the DB defaults.
-      })
-      .select('id')
-      .single()
-
-    if (error) {
+    let submissionId: string
+    try {
+      submissionId = await createSubmission({ userId: profile.id, siteId, workDate, checklist, notes })
+    } catch (err) {
       setSubmitStep(null)
-      console.error('Submit failed:', error)
-      setError(submitErrorMessage(error))
+      console.error('Submit failed:', err)
+      setError(submitErrorMessage(err as PostgrestError))
       return
     }
 
     // 2. Upload the photos. The form is already saved at this point: if some
     //    photos fail, we still report success and say which part failed.
     setSubmitStep('uploading')
-    const photosFailed = await uploadSubmissionPhotos(profile.id, submission.id, photos)
+    const photosFailed = await uploadSubmissionPhotos(profile.id, submissionId, photos)
     setSubmitStep(null)
 
     // 3. Success: remember what was sent for the message, then reset the form.

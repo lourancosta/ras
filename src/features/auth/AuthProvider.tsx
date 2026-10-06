@@ -61,6 +61,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile: currentResult?.profile ?? null,
     profileError: currentResult?.error ?? null,
     loading,
+    // On success there's nothing else to do: onAuthStateChange (above) gets the new session.
+    signIn: async (email, password) => {
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+      return error
+    },
     signOut: async () => {
       await supabase.auth.signOut()
     },

@@ -1,10 +1,11 @@
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { FilePlus } from 'lucide-react'
 import { useAuth } from '../../auth/auth-context'
 import { can } from '../../../lib/permissions'
 import { DataTable, type Column } from '../../../components/DataTable/DataTable'
 import { FilterPanel } from '../../../components/FilterPanel/FilterPanel'
 import { StatusBadge } from '../components/StatusBadge/StatusBadge'
+import { StatusSelect } from '../components/StatusSelect/StatusSelect'
 import { ChecklistResult, PhotoCount } from '../components/SubmissionCells/SubmissionCells'
 import {
   Button,
@@ -21,6 +22,7 @@ import {
 import { checklistGroups } from '../checklist'
 import { formatDate, todayInVancouver } from '../../../lib/dates'
 import { useAsync } from '../../../lib/useAsync'
+import { useUrlFilters } from '../../../lib/useUrlFilters'
 import {
   fetchMySubmissions,
   fetchSiteOptions,
@@ -57,13 +59,19 @@ export function MySubmissionsPage() {
   const today = todayInVancouver()
   const canCreate = can(profile?.role, 'submissions.create')
 
-  // Filters live in the URL (see myFilters.ts): they survive a refresh, work with Back,
-  // and the dashboard can link straight to a filtered list. No filter state here.
-  const [searchParams, setSearchParams] = useSearchParams()
-  const filters = parseMyFilters(searchParams)
-  const filterKey = searchParams.toString()
-  const hasFilters = filterKey !== ''
-  const listUrl = `/my-submissions${hasFilters ? `?${filterKey}` : ''}`
+  // Filters live in the URL (useUrlFilters; rules in myFilters.ts), so the dashboard can
+  // link straight to a filtered list. No filter state here.
+  const {
+    params,
+    key: filterKey,
+    hasFilters,
+    activeCount,
+    listUrl,
+    setFilter,
+    setFilters,
+    clear,
+  } = useUrlFilters()
+  const filters = parseMyFilters(params)
 
   // Site options, once. If it fails, the dropdown only has "All sites" (the list still works).
   const { data: sites } = useAsync('sites', fetchSiteOptions, 'Loading sites failed.')
@@ -95,24 +103,12 @@ export function MySubmissionsPage() {
   const { loading, error } = list
   const submissions = list.data
 
-  // Set or remove one URL parameter, keeping the others.
-  function setFilter(name: string, value: string) {
-    const next = new URLSearchParams(searchParams)
-    if (value) next.set(name, value)
-    else next.delete(name)
-    setSearchParams(next, { replace: true })
-  }
-
   // The date dropdown covers two parameters: a preset (`period`) or one exact day
   // (`date`, only when you came from a dashboard chart bar). Picking one clears the other.
   const dateValue = filters.date ? `day:${filters.date}` : filters.period ?? ''
   function setDateFilter(value: string) {
     if (value.startsWith('day:')) return // the exact day is already selected
-    const next = new URLSearchParams(searchParams)
-    next.delete('date')
-    if (value) next.set('period', value)
-    else next.delete('period')
-    setSearchParams(next, { replace: true })
+    setFilters({ date: null, period: value })
   }
 
   const count = submissions?.length ?? 0
@@ -143,7 +139,7 @@ export function MySubmissionsPage() {
       )}
 
       {/* activeCount: one per filter set in the URL ("Show filters (2)" on phones). */}
-      <FilterPanel activeCount={[...searchParams.keys()].length}>
+      <FilterPanel activeCount={activeCount}>
         <Field>
           Site
           <Select value={filters.siteId ?? ''} onChange={(e) => setFilter('site', e.target.value)}>
@@ -159,12 +155,7 @@ export function MySubmissionsPage() {
 
         <Field>
           Status
-          <Select value={filters.status ?? ''} onChange={(e) => setFilter('status', e.target.value)}>
-            <option value="">All statuses</option>
-            <option value="submitted">Pending review</option>
-            <option value="reviewed">Reviewed</option>
-            <option value="flagged">Flagged</option>
-          </Select>
+          <StatusSelect value={filters.status} onChange={(value) => setFilter('status', value)} />
         </Field>
 
         <Field>
@@ -201,7 +192,7 @@ export function MySubmissionsPage() {
       <ResultBar>
         <Hint>{countText}</Hint>
         {hasFilters && (
-          <ClearFiltersButton type="button" onClick={() => setSearchParams({}, { replace: true })}>
+          <ClearFiltersButton type="button" onClick={clear}>
             Clear filters
           </ClearFiltersButton>
         )}

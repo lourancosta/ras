@@ -5,6 +5,7 @@ import { Tile, Tiles } from '../components/Tile/Tile'
 import { ErrorMessage, GoodNews, Hint, PageTitle, Panel, PanelGrid, PanelTitle } from '../../../components/ui'
 import { formatDate, todayInVancouver } from '../../../lib/dates'
 import { fetchSummary, SUMMARY_DAYS } from '../summary'
+import { STATUS_LABELS } from '../../submissions/status'
 import { Container, NameList, SiteGroup } from './OverviewDashboard.styles'
 import { useAsync } from '../../../lib/useAsync'
 
@@ -49,13 +50,13 @@ export function OverviewDashboard() {
               to="/submissions?status=submitted"
               icon={Clock}
               value={String(summary.pendingCount)}
-              label="Pending review"
+              label={STATUS_LABELS.submitted}
             />
             <Tile
               to="/submissions?status=flagged"
               icon={Flag}
               value={String(summary.flaggedCount)}
-              label="Flagged"
+              label={STATUS_LABELS.flagged}
               tone={summary.flaggedCount > 0 ? 'danger' : undefined}
             />
           </Tiles>
