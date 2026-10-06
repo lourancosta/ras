@@ -22,12 +22,18 @@ import {
   PhotoGrid,
 } from './SubmissionDetail.styles'
 
+type SubmissionDetailProps = {
+  id: string
+  // false = never show the review panel (the review queue has its own buttons).
+  showReviewPanel?: boolean
+}
+
 // Loads and shows one submission: header, checklist answers, notes and photos.
-// Used by both detail pages; users with 'submissions.review' also get the review
-// actions. Render it with key={id} so a different id starts with fresh state.
-export function SubmissionDetail({ id }: { id: string }) {
+// Used by both detail pages and the review queue; users with 'submissions.review' also
+// get the review actions. Render it with key={id} so a different id starts with fresh state.
+export function SubmissionDetail({ id, showReviewPanel = true }: SubmissionDetailProps) {
   const { profile } = useAuth()
-  const canReview = can(profile?.role, 'submissions.review')
+  const canReview = showReviewPanel && can(profile?.role, 'submissions.review')
   // undefined = loading, null = not found / not allowed.
   const [data, setData] = useState<SubmissionDetailData | null | undefined>(undefined)
   const [error, setError] = useState<string | null>(null)

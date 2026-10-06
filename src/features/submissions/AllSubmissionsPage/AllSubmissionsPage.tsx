@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { DataTable, type Column } from '../../../components/DataTable/DataTable'
+import { ReviewQueue, type QueueReview } from '../components/ReviewQueue/ReviewQueue'
 import { StatusBadge } from '../components/StatusBadge/StatusBadge'
 import { ChecklistResult, PhotoCount } from '../components/SubmissionCells/SubmissionCells'
+import { ListChecks } from 'lucide-react'
 import {
+  Button,
   ClearFiltersButton,
   ErrorMessage,
   Field,
@@ -12,6 +15,7 @@ import {
   Input,
   ListPage,
   PageTitle,
+  ResultActions,
   ResultBar,
   Select,
 } from '../../../components/ui'
@@ -74,6 +78,8 @@ export function AllSubmissionsPage() {
   const [options, setOptions] = useState<FilterOptions | null>(null)
   const [optionsError, setOptionsError] = useState<string | null>(null)
   const [result, setResult] = useState<Result | null>(null)
+  // The review queue's forms (ids), fixed when it opens; null = closed.
+  const [queueIds, setQueueIds] = useState<string[] | null>(null)
 
   // Dropdown options, once.
   useEffect(() => {
@@ -120,6 +126,20 @@ export function AllSubmissionsPage() {
   }
 
   const hasFilters = filterKey !== ''
+
+  // Review queue: the pending forms in the current list (so it follows the filters),
+  // oldest first, the usual order for working through a backlog.
+  const pending = rows
+    .filter((row) => row.status === 'submitted')
+    .sort((a, b) => a.work_date.localeCompare(b.work_date) || a.created_at.localeCompare(b.created_at))
+
+  // A form was saved in the queue: update its row here too, so the table is right when
+  // the queue closes (no reload needed).
+  function handleQueueReviewed({ id, ...saved }: QueueReview) {
+    setResult((current) =>
+      current && { ...current, rows: current.rows.map((row) => (row.id === id ? { ...row, ...saved } : row)) },
+    )
+  }
 
   // Opens a form. state.back = this page's URL with its filters, so the detail
   // page's "Back to all submissions" returns to the same filtered list.
@@ -188,12 +208,24 @@ export function AllSubmissionsPage() {
             : `${rows.length} form${rows.length === 1 ? '' : 's'}` +
               (rows.length === ADMIN_ROW_LIMIT ? ` (showing the most recent ${ADMIN_ROW_LIMIT}, narrow the filters)` : '')}
         </Hint>
-        {hasFilters && (
-          <ClearFiltersButton type="button" onClick={() => setSearchParams({}, { replace: true })}>
-            Clear filters
-          </ClearFiltersButton>
-        )}
+        <ResultActions>
+          {hasFilters && (
+            <ClearFiltersButton type="button" onClick={() => setSearchParams({}, { replace: true })}>
+              Clear filters
+            </ClearFiltersButton>
+          )}
+          {/* Only when there's something to review. */}
+          {pending.length > 0 && (
+            <Button type="button" onClick={() => setQueueIds(pending.map((row) => row.id))}>
+              <ListChecks size={18} aria-hidden="true" /> Review queue ({pending.length})
+            </Button>
+          )}
+        </ResultActions>
       </ResultBar>
+
+      {queueIds && (
+        <ReviewQueue ids={queueIds} onReviewed={handleQueueReviewed} onClose={() => setQueueIds(null)} />
+      )}
 
       {invalidRange && <ErrorMessage>The "From" date is after the "To" date.</ErrorMessage>}
       {optionsError && <ErrorMessage>{optionsError}</ErrorMessage>}

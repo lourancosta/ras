@@ -22,11 +22,9 @@ export const Actions = styled.div`
 `
 
 export const ReviewedButton = styled(Button)`
-  gap: 8px;
   background: ${({ theme }) => theme.colors.success};
 `
 
 export const FlagButton = styled(Button)`
-  gap: 8px;
   background: ${({ theme }) => theme.colors.danger};
 `

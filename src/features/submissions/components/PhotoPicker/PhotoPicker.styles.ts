@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { buttonSize } from '../../../../components/ui'
 
 export const Grid = styled.div`
   display: grid;
@@ -45,7 +46,7 @@ export const AddLabel = styled.label<{ $disabled: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
+  ${buttonSize}
   border: 1px dashed ${({ theme }) => theme.colors.brand};
   border-radius: ${({ theme }) => theme.radius};
   color: ${({ theme }) => theme.colors.brand};

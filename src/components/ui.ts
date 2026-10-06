@@ -53,15 +53,31 @@ export const Hint = styled.span`
   color: ${({ theme }) => theme.colors.muted};
 `
 
+// One size for every button with a text label (Button, SecondaryButton, Clear filters,
+// the photo picker's Take photo / Choose photos), so they all have the same height:
+// 12px + 20px line + 12px, plus a 1px border (transparent on filled buttons).
+// Icons are forced to 16px so a button with an icon is as tall as one without.
+export const buttonSize = css`
+  padding: 12px;
+  font-size: 14px;
+  line-height: 20px; /* a bit above the font size so letters aren't clipped */
+  border: 1px solid transparent;
+
+  & svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+`
+
 // Also used as a link: <Button as={Link} to="/">, hence the flex/text-decoration rules.
 export const Button = styled.button`
+  ${buttonSize}
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px; /* space between an icon and the text */
-  padding: 12px 16px;
   text-decoration: none;
-  border: none;
   border-radius: ${({ theme }) => theme.radius};
   background: ${({ theme }) => theme.colors.brand};
   color: ${({ theme }) => theme.colors.brandText};
@@ -223,8 +239,17 @@ export const ResultBar = styled.div`
   min-height: 32px;
 `
 
+// Right side of the ResultBar: "Clear filters", "Review queue"...
+export const ResultActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+`
+
 export const ClearFiltersButton = styled.button`
-  padding: 4px 10px;
+  ${buttonSize}
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radius};
   background: ${({ theme }) => theme.colors.surface};
