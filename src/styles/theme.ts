@@ -16,6 +16,9 @@ export const theme = {
     danger: '#b91c1c',
     dangerBg: '#fdecec',
     overlay: 'rgba(0, 0, 0, 0.35)', // dims the page behind the open phone menu
+    viewerBg: 'rgba(0, 0, 0, 0.94)', // full-screen photo viewer
+    viewerText: '#ffffff',
+    viewerControl: 'rgba(255, 255, 255, 0.16)', // round buttons on top of the photo
   },
   radius: '8px',
   sidebarWidth: '232px',

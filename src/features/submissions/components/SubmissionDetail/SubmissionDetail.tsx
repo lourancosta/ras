@@ -5,6 +5,7 @@ import { can } from '../../../../lib/permissions'
 import { checklistGroups } from '../../checklist'
 import { formatDate, formatDateTime } from '../../../../lib/dates'
 import { fetchSubmissionDetail, type SubmissionDetailData } from '../../submissions'
+import { PhotoViewer } from '../PhotoViewer/PhotoViewer'
 import { ReviewPanel, type ReviewUpdate } from '../ReviewPanel/ReviewPanel'
 import { StatusBadge } from '../StatusBadge/StatusBadge'
 import { ErrorMessage, Hint } from '../../../../components/ui'
@@ -22,6 +23,7 @@ import {
   Answer,
   Notes,
   PhotoGrid,
+  PhotoButton,
 } from './SubmissionDetail.styles'
 
 type SubmissionDetailProps = {
@@ -40,6 +42,7 @@ export function SubmissionDetail({ id, showReviewPanel = true }: SubmissionDetai
   // undefined = loading, null = not found / not allowed.
   const [data, setData] = useState<SubmissionDetailData | null | undefined>(undefined)
   const [error, setError] = useState<string | null>(null)
+  const [viewing, setViewing] = useState<number | null>(null) // index of the photo open full screen
 
   useEffect(() => {
     fetchSubmissionDetail(id)
@@ -142,13 +145,20 @@ export function SubmissionDetail({ id, showReviewPanel = true }: SubmissionDetai
               <>
                 <PhotoGrid>
                   {photos.map((photo, index) => (
-                    // Opens the full-size photo in a new tab.
-                    <a key={photo.id} href={photo.url} target="_blank" rel="noreferrer">
-                      <img src={photo.url} alt={`Photo ${index + 1} of ${photos.length}`} />
-                    </a>
+                    <PhotoButton
+                      key={photo.id}
+                      type="button"
+                      onClick={() => setViewing(index)}
+                      aria-label={`Open photo ${index + 1} of ${photos.length}`}
+                    >
+                      <img src={photo.url} alt="" />
+                    </PhotoButton>
                   ))}
                 </PhotoGrid>
-                <Hint>Tap a photo to open it full size. Links expire after 1 hour (reload the page).</Hint>
+                <Hint>Tap a photo to see it full screen. Links expire after 1 hour (reload the page).</Hint>
+                {viewing !== null && (
+                  <PhotoViewer photos={photos} startIndex={viewing} onClose={() => setViewing(null)} />
+                )}
               </>
             )}
           </Section>

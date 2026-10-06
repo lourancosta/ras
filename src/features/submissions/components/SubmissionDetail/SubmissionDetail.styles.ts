@@ -125,3 +125,18 @@ export const PhotoGrid = styled.div`
     border-radius: ${({ theme }) => theme.radius};
   }
 `
+
+// A thumbnail is a button: tapping it opens the full-screen PhotoViewer.
+export const PhotoButton = styled.button`
+  display: block;
+  padding: 0;
+  border: none;
+  border-radius: ${({ theme }) => theme.radius};
+  background: none;
+  cursor: zoom-in;
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.accent};
+    outline-offset: 2px;
+  }
+`
