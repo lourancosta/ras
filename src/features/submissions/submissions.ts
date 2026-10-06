@@ -72,6 +72,14 @@ export async function fetchSubmittedToday(userId: string, today: string): Promis
   return (count ?? 0) > 0
 }
 
+// Active sites, for the new form's dropdown. Inactive sites are hidden here, and the
+// database rejects them too (RLS insert policy).
+export async function fetchActiveSites() {
+  const { data, error } = await supabase.from('sites').select('id, name').eq('is_active', true).order('name')
+  if (error) throw error
+  return data
+}
+
 // Sites for the "Site" filter: all of them, inactive too (old forms are still history).
 export async function fetchSiteOptions() {
   const { data, error } = await supabase.from('sites').select('id, name, is_active').order('name')
@@ -99,19 +107,15 @@ export async function fetchSubmissionDetail(id: string) {
   if (error) throw error
   if (!submission) return null
 
-  const photoRows = [...submission.submission_photos].sort((a, b) =>
-    a.created_at.localeCompare(b.created_at),
-  )
+  const photoRows = [...submission.submission_photos].sort((a, b) => a.created_at.localeCompare(b.created_at))
 
   // One request signs all paths. Each signed URL is a temporary link to a private file.
   let photos: { id: string; url: string }[] = []
   if (photoRows.length > 0) {
-    const { data: signed, error: signError } = await supabase.storage
-      .from(PHOTO_BUCKET)
-      .createSignedUrls(
-        photoRows.map((photo) => photo.storage_path),
-        SIGNED_URL_SECONDS,
-      )
+    const { data: signed, error: signError } = await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(
+      photoRows.map((photo) => photo.storage_path),
+      SIGNED_URL_SECONDS,
+    )
     if (signError) throw signError
 
     // Results come back in the same order as the paths.

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { DataTable, type Column } from '../../../components/DataTable/DataTable'
 import { FilterPanel } from '../../../components/FilterPanel/FilterPanel'
@@ -20,6 +20,7 @@ import {
   Select,
 } from '../../../components/ui'
 import type { Enums } from '../../../lib/database.types'
+import { useAsync } from '../../../lib/useAsync'
 import { formatDate } from '../../../lib/dates'
 import {
   ADMIN_ROW_LIMIT,
@@ -27,7 +28,6 @@ import {
   fetchSubmissions,
   photoCountOf,
   type AdminSubmission,
-  type FilterOptions,
   type SubmissionFilters,
 } from '../submissions'
 
@@ -55,9 +55,6 @@ const columns: Column<AdminSubmission>[] = [
   { header: 'Date', cell: (row) => formatDate(row.work_date) },
 ]
 
-// Outcome of one load, tagged with the filters it was for (see `loading` below).
-type Result = { key: string; rows: AdminSubmission[]; error: string | null }
-
 // /submissions ("All Submissions"): every submitted form in a filterable table.
 export function AllSubmissionsPage() {
   // Filters live in the URL (?site=..&worker=..&status=..&from=..&to=..):
@@ -75,46 +72,26 @@ export function AllSubmissionsPage() {
   }
   const filterKey = searchParams.toString()
 
-  const [options, setOptions] = useState<FilterOptions | null>(null)
-  const [optionsError, setOptionsError] = useState<string | null>(null)
-  const [result, setResult] = useState<Result | null>(null)
   // The review queue's forms (ids), fixed when it opens; null = closed.
   const [queueIds, setQueueIds] = useState<string[] | null>(null)
 
-  // Dropdown options, once.
-  useEffect(() => {
-    fetchFilterOptions()
-      .then(setOptions)
-      .catch((err) => {
-        console.error('Loading filter options failed:', err)
-        setOptionsError('Could not load sites and workers. Please refresh the page.')
-      })
-  }, [])
+  // Dropdown options, once (fixed key).
+  const { data: options, error: optionsError } = useAsync(
+    'filter-options',
+    fetchFilterOptions,
+    'Could not load sites and workers. Please refresh the page.',
+  )
 
-  // Submissions, every time the filters (URL) change.
-  const { siteId, workerId, status, from, to } = filters
-  useEffect(() => {
-    let ignore = false // a newer filter change happened: drop this older response
-    fetchSubmissions({ siteId, workerId, status, from, to })
-      .then((rows) => {
-        if (!ignore) setResult({ key: filterKey, rows, error: null })
-      })
-      .catch((err) => {
-        console.error('Loading submissions failed:', err)
-        if (!ignore) {
-          setResult({ key: filterKey, rows: [], error: 'Could not load forms. Please refresh the page.' })
-        }
-      })
-    return () => {
-      ignore = true
-    }
-  }, [filterKey, siteId, workerId, status, from, to])
-
-  // Derived: loading until we have a result for the *current* filters.
-  // Old rows/errors from previous filters are never shown.
-  const loading = result?.key !== filterKey
-  const rows = loading ? [] : result.rows
-  const error = loading ? null : result.error
+  // Submissions, again every time the filters (URL) change: the key is the URL's query string.
+  // While loading, `rows` is empty: old rows from previous filters are never shown.
+  const submissions = useAsync(
+    filterKey,
+    () => fetchSubmissions(filters),
+    'Could not load forms. Please refresh the page.',
+  )
+  const { loading, error } = submissions
+  const rows = submissions.data ?? []
+  const { siteId, workerId, from, to } = filters
   const invalidRange = !!from && !!to && from > to
 
   // Set or remove one URL parameter, keeping the others.
@@ -136,9 +113,7 @@ export function AllSubmissionsPage() {
   // A form was saved in the queue: update its row here too, so the table is right when
   // the queue closes (no reload needed).
   function handleQueueReviewed({ id, ...saved }: QueueReview) {
-    setResult((current) =>
-      current && { ...current, rows: current.rows.map((row) => (row.id === id ? { ...row, ...saved } : row)) },
-    )
+    submissions.setData((current) => current.map((row) => (row.id === id ? { ...row, ...saved } : row)))
   }
 
   // Opens a form. state.back = this page's URL with its filters, so the detail
@@ -193,7 +168,12 @@ export function AllSubmissionsPage() {
 
         <Field>
           From
-          <Input type="date" value={from ?? ''} max={to} onChange={(e) => setFilter('from', e.target.value)} />
+          <Input
+            type="date"
+            value={from ?? ''}
+            max={to}
+            onChange={(e) => setFilter('from', e.target.value)}
+          />
         </Field>
 
         <Field>
@@ -207,7 +187,9 @@ export function AllSubmissionsPage() {
           {loading
             ? 'Loading…'
             : `${rows.length} form${rows.length === 1 ? '' : 's'}` +
-              (rows.length === ADMIN_ROW_LIMIT ? ` (showing the most recent ${ADMIN_ROW_LIMIT}, narrow the filters)` : '')}
+              (rows.length === ADMIN_ROW_LIMIT
+                ? ` (showing the most recent ${ADMIN_ROW_LIMIT}, narrow the filters)`
+                : '')}
         </Hint>
         <ResultActions>
           {hasFilters && (

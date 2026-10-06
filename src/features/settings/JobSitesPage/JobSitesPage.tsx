@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { DataTable, type Column } from '../../../components/DataTable/DataTable'
 import { Modal } from '../../../components/Modal/Modal'
@@ -14,6 +14,7 @@ import {
 } from '../../../components/ui'
 import { SiteForm } from '../components/SiteForm/SiteForm'
 import { fetchSites, type Site } from '../sites'
+import { useAsync } from '../../../lib/useAsync'
 
 // `card` = where each column goes on a phone card; unmarked columns are the detail line.
 const columns: Column<Site>[] = [
@@ -34,19 +35,13 @@ type ModalState = { mode: 'create' } | { mode: 'edit'; site: Site } | null
 // /settings/sites (admin): every job site. "New site" and clicking a row open a modal
 // with the form (create / edit name, address and status).
 export function JobSitesPage() {
-  const [sites, setSites] = useState<Site[] | null>(null) // null = loading
-  const [loadError, setLoadError] = useState<string | null>(null)
+  const {
+    data: sites, // null while loading
+    error: loadError,
+    setData: setSites,
+  } = useAsync('sites', fetchSites, 'Could not load the sites. Please refresh the page.')
   const [modal, setModal] = useState<ModalState>(null)
   const [success, setSuccess] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetchSites()
-      .then(setSites)
-      .catch((err) => {
-        console.error('Loading sites failed:', err)
-        setLoadError('Could not load the sites. Please refresh the page.')
-      })
-  }, [])
 
   function openModal(next: Exclude<ModalState, null>) {
     setSuccess(null)
@@ -58,9 +53,7 @@ export function JobSitesPage() {
   function handleSaved(saved: Site) {
     const wasEdit = modal?.mode === 'edit'
     setSites((current) =>
-      [...(current ?? []).filter((site) => site.id !== saved.id), saved].sort((a, b) =>
-        a.name.localeCompare(b.name),
-      ),
+      [...current.filter((site) => site.id !== saved.id), saved].sort((a, b) => a.name.localeCompare(b.name)),
     )
     setModal(null)
     setSuccess(wasEdit ? `"${saved.name}" was updated.` : `"${saved.name}" was added.`)

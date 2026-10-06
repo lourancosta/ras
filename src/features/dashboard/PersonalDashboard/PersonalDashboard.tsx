@@ -1,23 +1,15 @@
-import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { AlertTriangle, CheckCircle2, ClipboardList, Flag } from 'lucide-react'
 import { useAuth } from '../../auth/auth-context'
 import { FormsPerDayChart, HorizontalBarChart } from '../components/SummaryCharts'
 import { Tile, Tiles } from '../components/Tile/Tile'
-import {
-  ErrorMessage,
-  GoodNews,
-  Hint,
-  PageTitle,
-  Panel,
-  PanelGrid,
-  PanelTitle,
-} from '../../../components/ui'
+import { ErrorMessage, GoodNews, Hint, PageTitle, Panel, PanelGrid, PanelTitle } from '../../../components/ui'
 import { formatDate, todayInVancouver } from '../../../lib/dates'
-import { fetchMySummary, SUMMARY_DAYS, type MySummary } from '../summary'
+import { fetchMySummary, SUMMARY_DAYS } from '../summary'
 import type { ChecklistKey } from '../../submissions/checklist'
 import { mySubmissionsLink } from '../../submissions/myFilters'
 import { Container } from './PersonalDashboard.styles'
+import { useAsync } from '../../../lib/useAsync'
 
 // /dashboard (framer): the signed-in framer's own numbers, never anyone else's.
 // Same layout as the admin dashboard: tiles for today, charts for the last 14 days.
@@ -26,19 +18,13 @@ export function PersonalDashboard() {
   const { profile } = useAuth()
   const navigate = useNavigate()
   const today = todayInVancouver()
-  const [summary, setSummary] = useState<MySummary | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
   const userId = profile?.id
-  useEffect(() => {
-    if (!userId) return
-    fetchMySummary(userId, today)
-      .then(setSummary)
-      .catch((err) => {
-        console.error('Loading my summary failed:', err)
-        setError('Could not load your dashboard. Please refresh the page.')
-      })
-  }, [userId, today])
+  // null key until the user is known (`userId!` is safe: the request only runs with a key).
+  const { data: summary, error } = useAsync(
+    userId ? `${userId}:${today}` : null,
+    () => fetchMySummary(userId!, today),
+    'Could not load your dashboard. Please refresh the page.',
+  )
 
   return (
     <Container>

@@ -1,35 +1,22 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { AlertTriangle, CheckCircle2, Clock, Flag, Users } from 'lucide-react'
 import { FormsPerDayChart, HorizontalBarChart } from '../components/SummaryCharts'
 import { Tile, Tiles } from '../components/Tile/Tile'
-import {
-  ErrorMessage,
-  GoodNews,
-  Hint,
-  PageTitle,
-  Panel,
-  PanelGrid,
-  PanelTitle,
-} from '../../../components/ui'
+import { ErrorMessage, GoodNews, Hint, PageTitle, Panel, PanelGrid, PanelTitle } from '../../../components/ui'
 import { formatDate, todayInVancouver } from '../../../lib/dates'
-import { fetchSummary, SUMMARY_DAYS, type Summary } from '../summary'
+import { fetchSummary, SUMMARY_DAYS } from '../summary'
 import { Container, NameList, SiteGroup } from './OverviewDashboard.styles'
+import { useAsync } from '../../../lib/useAsync'
 
 // /dashboard (admin): today's submissions at a glance + the last 14 days in charts.
 export function OverviewDashboard() {
   const today = todayInVancouver()
-  const [summary, setSummary] = useState<Summary | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetchSummary(today)
-      .then(setSummary)
-      .catch((err) => {
-        console.error('Loading summary failed:', err)
-        setError('Could not load the summary. Please refresh the page.')
-      })
-  }, [today])
+  // Key = today: reloads if the page stays open past midnight (Vancouver).
+  const { data: summary, error } = useAsync(
+    today,
+    () => fetchSummary(today),
+    'Could not load the summary. Please refresh the page.',
+  )
 
   return (
     <Container>

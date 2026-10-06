@@ -19,26 +19,14 @@ import {
   Textarea,
 } from '../../../components/ui'
 import { checklistGroups, emptyChecklist, type ChecklistAnswers } from '../checklist'
-import type { Tables } from '../../../lib/database.types'
 import { formatDate, todayInVancouver } from '../../../lib/dates'
-import {
-  MAX_PHOTOS,
-  preparePhotos,
-  uploadSubmissionPhotos,
-  type SelectedPhoto,
-} from '../photos'
+import { MAX_PHOTOS, preparePhotos, uploadSubmissionPhotos, type SelectedPhoto } from '../photos'
 import { supabase } from '../../../lib/supabase'
-import {
-  Container,
-  Form,
-  Section,
-  SectionTitle,
-  Actions,
-} from './NewSubmissionPage.styles'
+import { useAsync } from '../../../lib/useAsync'
+import { fetchActiveSites } from '../submissions'
+import { Container, Form, Section, SectionTitle, Actions } from './NewSubmissionPage.styles'
 
 const NOTES_MAX_LENGTH = 2000 // same limit as the DB check constraint
-
-type Site = Pick<Tables<'sites'>, 'id' | 'name'>
 
 // Shown after a successful submit.
 type SubmittedInfo = {
@@ -55,9 +43,12 @@ export function NewSubmissionPage() {
   const { profile } = useAuth()
   const today = todayInVancouver()
 
-  // Active sites for the dropdown (null while loading).
-  const [sites, setSites] = useState<Site[] | null>(null)
-  const [sitesError, setSitesError] = useState<string | null>(null)
+  // Active sites for the dropdown (null while loading), once.
+  const { data: sites, error: sitesError } = useAsync(
+    'active-sites',
+    fetchActiveSites,
+    'Could not load job sites. Please refresh the page.',
+  )
 
   // Form fields.
   const [siteId, setSiteId] = useState('')
@@ -74,20 +65,6 @@ export function NewSubmissionPage() {
   const [submitStep, setSubmitStep] = useState<SubmitStep>(null)
   const [error, setError] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState<SubmittedInfo | null>(null)
-
-  // Load active sites once. Inactive sites are hidden here, and the database
-  // rejects them too (RLS insert policy).
-  useEffect(() => {
-    supabase
-      .from('sites')
-      .select('id, name')
-      .eq('is_active', true)
-      .order('name')
-      .then(({ data, error }) => {
-        if (error) setSitesError('Could not load job sites. Please refresh the page.')
-        else setSites(data)
-      })
-  }, [])
 
   // Free the thumbnails' memory if the user leaves the page with photos picked.
   // A ref (not `photos`) so the cleanup sees the latest list without re-running.
@@ -192,8 +169,7 @@ export function NewSubmissionPage() {
       <Container>
         <PageTitle>New safety form</PageTitle>
         <SuccessMessage>
-          Safety form submitted for <strong>{submitted.siteName}</strong> on{' '}
-          {formatDate(submitted.workDate)}
+          Safety form submitted for <strong>{submitted.siteName}</strong> on {formatDate(submitted.workDate)}
           {submitted.photosUploaded > 0 && ` with ${submitted.photosUploaded} photo(s)`}.
         </SuccessMessage>
         {submitted.photosFailed > 0 && (
@@ -236,12 +212,7 @@ export function NewSubmissionPage() {
             {sitesError ? (
               <ErrorMessage>{sitesError}</ErrorMessage>
             ) : (
-              <Select
-                required
-                value={siteId}
-                onChange={(e) => setSiteId(e.target.value)}
-                disabled={!sites}
-              >
+              <Select required value={siteId} onChange={(e) => setSiteId(e.target.value)} disabled={!sites}>
                 <option value="">{sites ? 'Select a site…' : 'Loading sites…'}</option>
                 {sites?.map((site) => (
                   <option key={site.id} value={site.id}>
@@ -267,7 +238,9 @@ export function NewSubmissionPage() {
         {checklistGroups.map((group) => (
           <Section key={group.title}>
             <SectionTitle>{group.title}</SectionTitle>
-            <Hint>Turn on each item that is in place. Anything left on "No" is reported as not in place.</Hint>
+            <Hint>
+              Turn on each item that is in place. Anything left on "No" is reported as not in place.
+            </Hint>
             <div>
               {group.items.map((item) => (
                 <Toggle
@@ -302,12 +275,7 @@ export function NewSubmissionPage() {
           <Hint>
             Site conditions, PPE, hazards. Up to {MAX_PHOTOS} photos, JPEG, PNG or WebP, max 5 MB each.
           </Hint>
-          <PhotoPicker
-            photos={photos}
-            onAdd={handleAddPhotos}
-            onRemove={handleRemovePhoto}
-            disabled={busy}
-          />
+          <PhotoPicker photos={photos} onAdd={handleAddPhotos} onRemove={handleRemovePhoto} disabled={busy} />
           {preparingPhotos && <Hint>Preparing photos…</Hint>}
           {photoErrors.map((message) => (
             <ErrorMessage key={message}>{message}</ErrorMessage>

@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Check, X } from 'lucide-react'
 import { useAuth } from '../../../auth/auth-context'
 import { can } from '../../../../lib/permissions'
 import { checklistGroups } from '../../checklist'
 import { formatDate, formatDateTime } from '../../../../lib/dates'
-import { fetchSubmissionDetail, type SubmissionDetailData } from '../../submissions'
+import { useAsync } from '../../../../lib/useAsync'
+import { fetchSubmissionDetail } from '../../submissions'
 import { PhotoViewer } from '../PhotoViewer/PhotoViewer'
 import { ReviewPanel, type ReviewUpdate } from '../ReviewPanel/ReviewPanel'
 import { StatusBadge } from '../StatusBadge/StatusBadge'
@@ -39,22 +40,16 @@ type SubmissionDetailProps = {
 export function SubmissionDetail({ id, showReviewPanel = true }: SubmissionDetailProps) {
   const { profile } = useAuth()
   const canReview = showReviewPanel && can(profile?.role, 'submissions.review')
-  // undefined = loading, null = not found / not allowed.
-  const [data, setData] = useState<SubmissionDetailData | null | undefined>(undefined)
-  const [error, setError] = useState<string | null>(null)
+  // data: null = not found / not allowed (once loading is over).
+  const { data, error, loading, setData } = useAsync(
+    id,
+    () => fetchSubmissionDetail(id),
+    'Could not load this form. Please refresh the page.',
+  )
   const [viewing, setViewing] = useState<number | null>(null) // index of the photo open full screen
 
-  useEffect(() => {
-    fetchSubmissionDetail(id)
-      .then(setData)
-      .catch((err) => {
-        console.error('Loading submission failed:', err)
-        setError('Could not load this form. Please refresh the page.')
-      })
-  }, [id])
-
   if (error) return <ErrorMessage>{error}</ErrorMessage>
-  if (data === undefined) return <Hint>Loading…</Hint>
+  if (loading) return <Hint>Loading…</Hint>
   if (data === null) return <ErrorMessage>Form not found.</ErrorMessage>
 
   const { submission, photos } = data
@@ -63,7 +58,7 @@ export function SubmissionDetail({ id, showReviewPanel = true }: SubmissionDetai
   // (reloading would also re-create the photo links).
   function handleReviewed({ reviewerName, ...saved }: ReviewUpdate) {
     setData((current) => {
-      if (!current) return current
+      if (!current) return current // not found: nothing to update
       const submission = { ...current.submission, ...saved, reviewer: { full_name: reviewerName } }
       return { ...current, submission }
     })

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { DataTable, type Column } from '../../../components/DataTable/DataTable'
 import { Modal } from '../../../components/Modal/Modal'
@@ -16,6 +16,7 @@ import { useAuth } from '../../auth/auth-context'
 import { WorkerForm } from '../components/WorkerForm/WorkerForm'
 import { ROLE_LABELS } from '../roles'
 import { fetchWorkers, type Worker } from '../workers'
+import { useAsync } from '../../../lib/useAsync'
 
 // `card` = where each column goes on a phone card; unmarked columns are the detail line.
 const columns: Column<Worker>[] = [
@@ -37,19 +38,13 @@ type ModalState = { mode: 'create' } | { mode: 'edit'; worker: Worker } | null
 // modal with the form (create / edit name, email, role, status, password).
 export function WorkersPage() {
   const { profile } = useAuth()
-  const [workers, setWorkers] = useState<Worker[] | null>(null) // null = loading
-  const [loadError, setLoadError] = useState<string | null>(null)
+  const {
+    data: workers, // null while loading
+    error: loadError,
+    setData: setWorkers,
+  } = useAsync('workers', fetchWorkers, 'Could not load the workers. Please refresh the page.')
   const [modal, setModal] = useState<ModalState>(null)
   const [success, setSuccess] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetchWorkers()
-      .then(setWorkers)
-      .catch((err) => {
-        console.error('Loading workers failed:', err)
-        setLoadError('Could not load the workers. Please refresh the page.')
-      })
-  }, [])
 
   function openModal(next: Exclude<ModalState, null>) {
     setSuccess(null)
@@ -61,7 +56,7 @@ export function WorkersPage() {
   function handleSaved(saved: Worker) {
     const wasEdit = modal?.mode === 'edit'
     setWorkers((current) =>
-      [...(current ?? []).filter((worker) => worker.id !== saved.id), saved].sort((a, b) =>
+      [...current.filter((worker) => worker.id !== saved.id), saved].sort((a, b) =>
         a.full_name.localeCompare(b.full_name),
       ),
     )
