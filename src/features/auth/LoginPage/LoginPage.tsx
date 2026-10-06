@@ -1,9 +1,22 @@
 import { useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router'
+import { Camera, ClipboardCheck, LayoutDashboard } from 'lucide-react'
 import { homePathFor } from '../../../routes'
 import { useAuth } from '../auth-context'
 import { Button, ErrorMessage, Field, Input } from '../../../components/ui'
-import { Page, LoginCard, Title, Subtitle } from './LoginPage.styles'
+import {
+  Page,
+  BrandPanel,
+  FullLogo,
+  Pitch,
+  Headline,
+  Features,
+  Feature,
+  FormSide,
+  LoginCard,
+  Title,
+  Subtitle,
+} from './LoginPage.styles'
 
 export function LoginPage() {
   const { session, profile, loading, signIn } = useAuth()
@@ -43,38 +56,63 @@ export function LoginPage() {
 
   return (
     <Page>
-      <LoginCard as="form" onSubmit={handleSubmit}>
-        <Title>RAS Site Safety Forms</Title>
-        <Subtitle>Sign in to continue</Subtitle>
+      {/* Left (top on phones): what this app is. */}
+      <BrandPanel>
+        <FullLogo src="/ras-full-logo.webp" alt="RAS Framing & Formwork" />
+        <Pitch>
+          <Headline>Daily site safety, in one place.</Headline>
+          <Features>
+            <Feature>
+              <ClipboardCheck size={20} aria-hidden="true" />
+              <span>A quick checklist: PPE, fall protection, ladders, tools and hazards.</span>
+            </Feature>
+            <Feature>
+              <Camera size={20} aria-hidden="true" />
+              <span>Photos of site conditions attached to each form.</span>
+            </Feature>
+            <Feature>
+              <LayoutDashboard size={20} aria-hidden="true" />
+              <span>A dashboard of today's forms, with flags for anything that needs follow-up.</span>
+            </Feature>
+          </Features>
+        </Pitch>
+      </BrandPanel>
 
-        <Field>
-          Email
-          <Input
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </Field>
+      {/* Right (below on phones): the sign-in form. */}
+      <FormSide>
+        <LoginCard as="form" onSubmit={handleSubmit}>
+          <Title>Welcome back</Title>
+          <Subtitle>Sign in to continue</Subtitle>
 
-        <Field>
-          Password
-          <Input
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </Field>
+          <Field>
+            Email
+            <Input
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Field>
 
-        {error && <ErrorMessage>{error}</ErrorMessage>}
+          <Field>
+            Password
+            <Input
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Field>
 
-        <Button type="submit" disabled={submitting}>
-          {submitting ? 'Signing in…' : 'Sign in'}
-        </Button>
-      </LoginCard>
+          {error && <ErrorMessage>{error}</ErrorMessage>}
+
+          <Button type="submit" disabled={submitting}>
+            {submitting ? 'Signing in…' : 'Sign in'}
+          </Button>
+        </LoginCard>
+      </FormSide>
     </Page>
   )
 }
