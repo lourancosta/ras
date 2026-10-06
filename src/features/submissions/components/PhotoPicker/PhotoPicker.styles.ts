@@ -1,9 +1,12 @@
 import styled from 'styled-components'
 import { buttonSize } from '../../../../components/ui'
+import { MAX_PHOTOS } from '../../photos'
 
+// One column per allowed photo (5), so a full set always fits in one row, on any screen.
+// minmax(0, 1fr): equal columns that may shrink below the image's natural size.
 export const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  grid-template-columns: repeat(${MAX_PHOTOS}, minmax(0, 1fr));
   gap: 8px;
   margin-bottom: 12px;
 `

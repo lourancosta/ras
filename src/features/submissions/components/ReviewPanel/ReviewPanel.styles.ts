@@ -14,3 +14,23 @@ export const Title = styled.h3`
   font-size: 1.05rem;
   color: ${({ theme }) => theme.colors.brand};
 `
+
+// Phones: text, then the buttons below. Wide screens: text on the left, buttons beside it.
+export const Row = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+`
+
+// Title + explanation, stacked.
+export const Text = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`

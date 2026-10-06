@@ -4,7 +4,7 @@ import type { Enums } from '../../../../lib/database.types'
 import { reviewSubmission } from '../../submissions'
 import { ButtonPair, ErrorMessage, Hint, SuccessMessage } from '../../../../components/ui'
 import { DecisionButtons, type ReviewDecision } from '../DecisionButtons/DecisionButtons'
-import { Panel, Title } from './ReviewPanel.styles'
+import { Panel, Row, Text, Title } from './ReviewPanel.styles'
 
 type ReviewStatus = ReviewDecision
 
@@ -55,17 +55,19 @@ export function ReviewPanel({ submissionId, status, onReviewed }: ReviewPanelPro
 
   return (
     <Panel>
-      <Title>Review</Title>
-      <Hint>
-        Review it if everything is fine, or flag it if something needs follow-up.
-      </Hint>
-      <ButtonPair>
-        <DecisionButtons
-          selected={status === 'submitted' ? undefined : status}
-          saving={saving}
-          onChoose={handleReview}
-        />
-      </ButtonPair>
+      <Row>
+        <Text>
+          <Title>Review</Title>
+          <Hint>Review it if everything is fine, or flag it if something needs follow-up.</Hint>
+        </Text>
+        <ButtonPair>
+          <DecisionButtons
+            selected={status === 'submitted' ? undefined : status}
+            saving={saving}
+            onChoose={handleReview}
+          />
+        </ButtonPair>
+      </Row>
       {message && <SuccessMessage>{message}</SuccessMessage>}
       {error && <ErrorMessage>{error}</ErrorMessage>}
     </Panel>
