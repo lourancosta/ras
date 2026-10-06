@@ -8,9 +8,7 @@
     "dev:phone": "vite --host --mode phone",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "seed": "node scripts/seed.mjs",
-    "seed:reset": "node scripts/seed.mjs --reset"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

@@ -28,3 +28,9 @@ CLAUDE.md
 
 # Local study notes (not shared)
 doc/STUDY_NOTES.md
+
+# Supabase migrations and Edge Functions (kept locally; already applied / deployed in Supabase)
+supabase/
+
+# Seed script (kept locally; run by hand with npm run seed)
+scripts/
