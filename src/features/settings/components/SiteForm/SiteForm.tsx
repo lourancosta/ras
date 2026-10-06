@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import type { PostgrestError } from '@supabase/supabase-js'
 import { Toggle } from '../../../../components/Toggle/Toggle'
-import { Button, ErrorMessage, Field, Hint, Input, SecondaryButton } from '../../../../components/ui'
+import { FormActions } from '../../../../components/FormActions/FormActions'
+import { ErrorMessage, Field, Form, Hint, Input } from '../../../../components/ui'
 import { createSite, updateSite, type Site } from '../../sites'
-import { Actions, Form } from './SiteForm.styles'
 
 const NAME_MAX_LENGTH = 120
 const ADDRESS_MAX_LENGTH = 200
@@ -101,14 +101,7 @@ export function SiteForm({ site, existingNames, onSaved, onCancel }: SiteFormPro
 
       {error && <ErrorMessage>{error}</ErrorMessage>}
 
-      <Actions>
-        <SecondaryButton type="button" onClick={onCancel} disabled={saving}>
-          Cancel
-        </SecondaryButton>
-        <Button type="submit" disabled={saving}>
-          {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Add site'}
-        </Button>
-      </Actions>
+      <FormActions submitLabel={isEdit ? 'Save changes' : 'Add site'} saving={saving} onCancel={onCancel} />
     </Form>
   )
 }

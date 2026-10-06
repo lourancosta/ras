@@ -1,11 +1,6 @@
 import styled from 'styled-components'
 
-export const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`
-
+// Cancel + submit, at the bottom right of the form; they wrap on very narrow screens.
 export const Actions = styled.div`
   display: flex;
   flex-wrap: wrap;

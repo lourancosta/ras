@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import { Toggle } from '../../../../components/Toggle/Toggle'
-import { Button, ErrorMessage, Field, Hint, Input, SecondaryButton, Select } from '../../../../components/ui'
+import { FormActions } from '../../../../components/FormActions/FormActions'
+import { ErrorMessage, Field, Form, Hint, Input, SecondaryButton, Select } from '../../../../components/ui'
 import { generatePassword, PASSWORD_MIN_LENGTH } from '../../password'
 import { ROLE_LABELS } from '../../roles'
 import { createWorker, updateWorker, type Role, type Worker, type WorkerChanges } from '../../workers'
-import { Actions, Form, PasswordRow } from './WorkerForm.styles'
+import { PasswordRow } from './WorkerForm.styles'
 
 // Same rules as the manage-worker Edge Function, checked here first for quick feedback.
 const NAME_MAX_LENGTH = 120
@@ -160,14 +161,12 @@ export function WorkerForm({ worker, isSelf, onSaved, onCancel }: WorkerFormProp
 
       {error && <ErrorMessage>{error}</ErrorMessage>}
 
-      <Actions>
-        <SecondaryButton type="button" onClick={onCancel} disabled={saving}>
-          Cancel
-        </SecondaryButton>
-        <Button type="submit" disabled={saving || !hasChanges}>
-          {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Create worker'}
-        </Button>
-      </Actions>
+      <FormActions
+        submitLabel={isEdit ? 'Save changes' : 'Create worker'}
+        saving={saving}
+        onCancel={onCancel}
+        disabled={!hasChanges} // editing: nothing changed yet
+      />
     </Form>
   )
 }

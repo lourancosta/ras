@@ -63,6 +63,13 @@ export const Textarea = styled.textarea`
   resize: vertical;
 `;
 
+// A form's fields, stacked (SiteForm, WorkerForm, the new safety form).
+export const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
 // Small grey helper text under a title or field.
 export const Hint = styled.span`
   font-size: 0.85rem;

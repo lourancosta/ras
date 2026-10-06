@@ -11,6 +11,7 @@ import {
   SecondaryButton,
   ErrorMessage,
   Field,
+  Form,
   Hint,
   Input,
   PageTitle,
@@ -23,7 +24,7 @@ import { formatDate, todayInVancouver } from '../../../lib/dates'
 import { MAX_PHOTOS, preparePhotos, uploadSubmissionPhotos, type SelectedPhoto } from '../photos'
 import { useAsync } from '../../../lib/useAsync'
 import { createSubmission, fetchActiveSites } from '../submissions'
-import { Container, Form, Section, SectionTitle, Actions } from './NewSubmissionPage.styles'
+import { Container, Section, SectionTitle, Actions } from './NewSubmissionPage.styles'
 
 const NOTES_MAX_LENGTH = 2000 // same limit as the DB check constraint
 
