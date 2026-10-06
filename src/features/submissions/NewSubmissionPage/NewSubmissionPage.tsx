@@ -8,6 +8,7 @@ import { Toggle } from '../../../components/Toggle/Toggle'
 import {
   BackLink,
   Button,
+  SecondaryButton,
   ErrorMessage,
   Field,
   Hint,
@@ -33,7 +34,6 @@ import {
   Section,
   SectionTitle,
   Actions,
-  SecondaryButton,
 } from './NewSubmissionPage.styles'
 
 const NOTES_MAX_LENGTH = 2000 // same limit as the DB check constraint

@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 
-export const Row = styled.label`
+export const Row = styled.label<{ $disabled: boolean }>`
   display: grid;
   grid-template-columns: 1fr auto 32px;
   align-items: center;
@@ -8,7 +8,8 @@ export const Row = styled.label`
   min-height: 48px;
   padding: 4px 0;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-  cursor: pointer;
+  cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
+  opacity: ${({ $disabled }) => ($disabled ? 0.6 : 1)};
 
   &:last-child {
     border-bottom: none;
@@ -51,6 +52,10 @@ export const Switch = styled.input`
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.colors.accent};
     outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
   }
 `
 

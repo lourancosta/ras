@@ -1,0 +1,14 @@
+import styled from 'styled-components'
+
+export const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`
+
+export const Actions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+`

@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Button, Card } from '../../../components/ui'
+import { Card } from '../../../components/ui'
 
 export const Container = styled.div`
   max-width: 640px;
@@ -31,10 +31,4 @@ export const Actions = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-`
-
-export const SecondaryButton = styled(Button)`
-  background: transparent;
-  color: ${({ theme }) => theme.colors.brand};
-  border: 1px solid ${({ theme }) => theme.colors.brand};
 `

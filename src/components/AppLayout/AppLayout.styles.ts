@@ -157,6 +157,40 @@ export const MenuButton = styled.button`
   ${menuItemStyles}
 `
 
+// Header of a menu group (e.g. Settings): looks like a menu item, full width so the
+// chevron can sit on the right.
+export const GroupButton = styled.button<{ $active: boolean }>`
+  ${menuItemStyles}
+  width: 100%;
+  text-align: left;
+  background: ${({ theme, $active }) => ($active ? theme.colors.brandTint : 'transparent')};
+`
+
+// Points down when the group is open, right when closed.
+export const GroupChevron = styled.span<{ $open: boolean }>`
+  display: flex;
+  margin-left: auto;
+  transform: rotate(${({ $open }) => ($open ? '0deg' : '-90deg')});
+  transition: transform 0.2s ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+`
+
+// The group's pages, indented under its header.
+export const SubMenu = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 20px;
+
+  /* display: flex above would otherwise override the hidden attribute. */
+  &[hidden] {
+    display: none;
+  }
+`
+
 // Phones: user name and sign out on one row, under a divider.
 // Wide screens: pushed to the bottom of the side menu.
 export const Footer = styled.div`

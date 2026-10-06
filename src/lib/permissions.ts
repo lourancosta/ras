@@ -15,11 +15,13 @@ export type Permission =
   | 'submissions.viewOwn' // "My submissions" and my forms' detail
   | 'submissions.create' // fill in a new safety form
   | 'submissions.review' // mark a form reviewed / flagged
+  | 'sites.manage' // Settings > Job sites: list, add and edit sites
+  | 'workers.manage' // Settings > Workers: list workers, activate / deactivate
 
 export type Role = Enums<'user_role'>
 
 const permissionsByRole: Record<Role, Permission[]> = {
-  admin: ['dashboard.viewAll', 'submissions.viewAll', 'submissions.review'],
+  admin: ['dashboard.viewAll', 'submissions.viewAll', 'submissions.review', 'sites.manage', 'workers.manage'],
   framer: ['dashboard.viewOwn', 'submissions.viewOwn', 'submissions.create'],
 }
 

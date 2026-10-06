@@ -79,6 +79,25 @@ export const Button = styled.button`
   }
 `
 
+// Outlined version of Button, for the less important action (Cancel, "Submit another").
+export const SecondaryButton = styled(Button)`
+  background: transparent;
+  color: ${({ theme }) => theme.colors.brand};
+  border: 1px solid ${({ theme }) => theme.colors.brand};
+`
+
+// Small rounded label, e.g. Active / Inactive in the settings tables.
+export const Pill = styled.span<{ $tone: 'success' | 'muted' }>`
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: ${({ theme, $tone }) => ($tone === 'success' ? theme.colors.successBg : theme.colors.bg)};
+  color: ${({ theme, $tone }) => ($tone === 'success' ? theme.colors.success : theme.colors.muted)};
+  border: 1px solid ${({ theme, $tone }) => ($tone === 'success' ? 'transparent' : theme.colors.border)};
+`
+
 // role="alert" makes screen readers announce the message when it appears.
 export const ErrorMessage = styled.p.attrs({ role: 'alert' })`
   margin: 0;

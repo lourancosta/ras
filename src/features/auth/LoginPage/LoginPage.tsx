@@ -30,7 +30,9 @@ export function LoginPage() {
       setError(
         error.code === 'invalid_credentials'
           ? 'Email or password is incorrect.'
-          : 'Could not sign in. Check your connection and try again.',
+          : error.code === 'user_banned' // deactivated in Settings > Workers
+            ? 'This account is inactive. Please contact an admin.'
+            : 'Could not sign in. Check your connection and try again.',
       )
     }
     // On success there's nothing to do here: AuthProvider hears the new
