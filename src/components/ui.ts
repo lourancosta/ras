@@ -13,12 +13,14 @@ export const Field = styled.label`
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0; /* lets the field shrink to its grid / flex column instead of overflowing */
   font-weight: 600;
 `
 
 // Shared by Input, Select and Textarea.
 const fieldStyles = css`
   width: 100%;
+  min-width: 0; /* some inputs (dates) have a built-in minimum width that overflows on phones */
   padding: 10px 12px;
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radius};
@@ -34,6 +36,21 @@ const fieldStyles = css`
 
 export const Input = styled.input`
   ${fieldStyles}
+
+  /* Phones (iOS Safari): the native date input ignores width and keeps a wide built-in size.
+     appearance: none removes that; min-height keeps the height of an empty one (iOS would
+     shrink it), and the value is aligned left like the other fields. */
+  @media (max-width: calc(${({ theme }) => theme.breakpoints.md} - 1px)) {
+    &[type='date'] {
+      appearance: none;
+      -webkit-appearance: none;
+      min-height: 44px;
+    }
+
+    &[type='date']::-webkit-date-and-time-value {
+      text-align: left;
+    }
+  }
 `
 
 export const Select = styled.select`
@@ -242,7 +259,8 @@ export const PageHeader = styled.div`
 
 // ---------- Filters (All Submissions, My submissions) ----------
 
-// The filter dropdowns: as many columns as fit (at least 140px each), stretched to fill.
+// The filter dropdowns on wide screens (use it through components/FilterPanel, which has
+// its own collapsible card on phones): as many columns as fit (at least 140px each).
 export const FilterCard = styled(Card)`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));

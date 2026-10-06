@@ -4,6 +4,7 @@ import { FilePlus } from 'lucide-react'
 import { useAuth } from '../../auth/auth-context'
 import { can } from '../../../lib/permissions'
 import { DataTable, type Column } from '../../../components/DataTable/DataTable'
+import { FilterPanel } from '../../../components/FilterPanel/FilterPanel'
 import { StatusBadge } from '../components/StatusBadge/StatusBadge'
 import { ChecklistResult, PhotoCount } from '../components/SubmissionCells/SubmissionCells'
 import {
@@ -11,7 +12,6 @@ import {
   ClearFiltersButton,
   ErrorMessage,
   Field,
-  FilterCard,
   Hint,
   ListPage,
   PageHeader,
@@ -167,7 +167,8 @@ export function MySubmissionsPage() {
         </Reminder>
       )}
 
-      <FilterCard>
+      {/* activeCount: one per filter set in the URL ("Show filters (2)" on phones). */}
+      <FilterPanel activeCount={[...searchParams.keys()].length}>
         <Field>
           Site
           <Select value={filters.siteId ?? ''} onChange={(e) => setFilter('site', e.target.value)}>
@@ -220,7 +221,7 @@ export function MySubmissionsPage() {
             ))}
           </Select>
         </Field>
-      </FilterCard>
+      </FilterPanel>
 
       <ResultBar>
         <Hint>{countText}</Hint>

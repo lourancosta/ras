@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { DataTable, type Column } from '../../../components/DataTable/DataTable'
+import { FilterPanel } from '../../../components/FilterPanel/FilterPanel'
 import { ReviewQueue, type QueueReview } from '../components/ReviewQueue/ReviewQueue'
 import { StatusBadge } from '../components/StatusBadge/StatusBadge'
 import { ChecklistResult, PhotoCount } from '../components/SubmissionCells/SubmissionCells'
@@ -10,7 +11,6 @@ import {
   ClearFiltersButton,
   ErrorMessage,
   Field,
-  FilterCard,
   Hint,
   Input,
   ListPage,
@@ -151,7 +151,8 @@ export function AllSubmissionsPage() {
     <ListPage>
       <PageTitle>All Submissions</PageTitle>
 
-      <FilterCard>
+      {/* activeCount: one per filter set in the URL ("Show filters (2)" on phones). */}
+      <FilterPanel activeCount={[...searchParams.keys()].length}>
         <Field>
           Site
           <Select value={siteId ?? ''} onChange={(e) => setFilter('site', e.target.value)}>
@@ -199,7 +200,7 @@ export function AllSubmissionsPage() {
           To
           <Input type="date" value={to ?? ''} min={from} onChange={(e) => setFilter('to', e.target.value)} />
         </Field>
-      </FilterCard>
+      </FilterPanel>
 
       <ResultBar>
         <Hint>
