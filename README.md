@@ -41,12 +41,10 @@ Built as the technical assessment for the Junior Software Developer role.
 
 <table>
   <tr>
-    <td align="center"><img src="public/screenshots/mobile03.jpeg" width="240" alt="Framer dashboard on a phone: tiles stacked, forms per day chart"></td>
     <td align="center"><img src="public/screenshots/mobile02.png" width="240" alt="My submissions on a phone: collapsible Filters panel and one card per form"></td>
     <td align="center"><img src="public/screenshots/mobile01.png" width="240" alt="New safety form on a phone: full-screen modal with a centred Submit form button"></td>
   </tr>
   <tr>
-    <td align="center">Dashboard: tiles and charts stacked</td>
     <td align="center">My submissions: cards instead of a table, filters behind a toggle</td>
     <td align="center">New form: full-screen modal, submit button pinned at the bottom</td>
   </tr>
