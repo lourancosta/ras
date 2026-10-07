@@ -6,7 +6,7 @@ submitted, on which site and when, review each form and flag anything that needs
 
 Built as the technical assessment for the Junior Software Developer role.
 
-- **Live app:** _add the Vercel URL here_
+- **Live app:** https://ras-psi.vercel.app
 - **ERD:** [doc/ras-erd.png](doc/ras-erd.png) (source: [doc/erd.dbml](doc/erd.dbml), made with dbdiagram.io)
 - **Test credentials:** one Admin and one Framer account, sent in the submission email. They aren't in this
   public repo, so nobody else can sign in as admin.
