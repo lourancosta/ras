@@ -34,3 +34,7 @@ supabase/
 
 # Seed script (kept locally; run by hand with npm run seed)
 scripts/
+
+# Kept locally only: confidential assessment brief, unused screenshot
+doc/RAS_Junior_Developer_Technical_Assessment.pdf
+public/screenshots/mobile03.jpeg
