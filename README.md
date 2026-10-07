@@ -11,6 +11,32 @@ Built as the technical assessment for the Junior Software Developer role.
 - **Test credentials:** one Admin and one Framer account, sent in the submission email. They aren't in this
   public repo, so nobody else can sign in as admin.
 
+## Screenshots
+
+**Framer**
+
+| Dashboard | My submissions |
+|---|---|
+| ![Framer dashboard: today's status, forms per day and issues by checklist item](public/screenshots/framer-dashboard.png) | ![My submissions: filters by site, status, date and checklist, with each form's issues, photos and status](public/screenshots/framer-submissions-list.png) |
+| Own numbers for the last 14 days. Clicking a tile or a bar opens the matching filtered list. | Filters by site, status, date and checklist. Each row shows its issues, photo count and review status. |
+
+| New safety form |
+|---|
+| ![New safety form in a modal: worker, job site, date and the PPE checklist](public/screenshots/framer-new-submission-form.png) |
+| Opens in a modal (full screen on phones). The worker comes from the signed-in account, and the submit button stays pinned at the bottom. |
+
+**Admin**
+
+| Submission detail | Review queue |
+|---|---|
+| ![Submission detail: header, review panel with Flag / Review, checklist answers, notes and photos](public/screenshots/submision-details.png) | ![Review queue: one pending form at a time with a 2 / 5 counter, Flag / Review and Previous / Next](public/screenshots/admin-review-queue.png) |
+| The full form, with Flag / Review next to the explanation and the photos in one row. Tap a photo for the full-screen viewer. | Works through the pending forms one by one, oldest first, with a progress counter. |
+
+| Workers (Settings) |
+|---|
+| ![Workers list with the New worker modal: full name, email, role and temporary password](public/screenshots/admin-new-worker.png) |
+| Admins create accounts with a role and a temporary password, and can edit or deactivate them. |
+
 ## Features
 
 **Framer (phone-first)**
