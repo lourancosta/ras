@@ -6,7 +6,6 @@ import { JobSitesPage } from './features/settings/JobSitesPage/JobSitesPage'
 import { WorkersPage } from './features/settings/WorkersPage/WorkersPage'
 import { AllSubmissionsPage } from './features/submissions/AllSubmissionsPage/AllSubmissionsPage'
 import { MySubmissionsPage } from './features/submissions/MySubmissionsPage/MySubmissionsPage'
-import { NewSubmissionPage } from './features/submissions/NewSubmissionPage/NewSubmissionPage'
 import { SubmissionDetailPage } from './features/submissions/SubmissionDetailPage/SubmissionDetailPage'
 import { can, type Permission, type Role } from './lib/permissions'
 
@@ -60,8 +59,9 @@ const appRoutes: AppRoute[] = [
   },
   {
     // "new" is a fixed segment, so React Router ranks it above "/my-submissions/:id".
+    // Same page as /my-submissions, with the new form open in a modal on top.
     path: '/my-submissions/new',
-    element: <NewSubmissionPage />,
+    element: <MySubmissionsPage />,
     permissions: ['submissions.create'],
   },
   {

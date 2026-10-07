@@ -50,8 +50,12 @@ export const Header = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
 `
 
+// flex: 1 1 auto, not flex: 1 (= basis 0%): a small modal has no fixed height, and with
+// a 0% basis some mobile browsers (iOS Safari) give the body 0px, hiding the content and
+// buttons. auto = start from the content's height, grow to fill a full-screen modal, and
+// shrink (then scroll, thanks to min-height: 0) when the content is taller than the screen.
 export const Body = styled.div`
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0; /* lets it shrink so it can scroll inside the dialog */
   overflow-y: auto;
   display: flex;
@@ -66,10 +70,11 @@ export const Footer = styled.div`
   background: ${({ theme }) => theme.colors.surface};
 `
 
-export const Title = styled.h2`
+// $danger: red title for questions like "Discard this form?".
+export const Title = styled.h2<{ $danger: boolean }>`
   margin: 0;
   font-size: 1.15rem;
-  color: ${({ theme }) => theme.colors.brand};
+  color: ${({ theme, $danger }) => ($danger ? theme.colors.danger : theme.colors.brand)};
 `
 
 export const CloseButton = styled.button`

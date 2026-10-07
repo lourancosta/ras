@@ -1,9 +1,10 @@
-import { Link, useNavigate } from 'react-router'
+import { Link, useLocation, useMatch, useNavigate } from 'react-router'
 import { FilePlus } from 'lucide-react'
 import { useAuth } from '../../auth/auth-context'
 import { can } from '../../../lib/permissions'
 import { DataTable, type Column } from '../../../components/DataTable/DataTable'
 import { FilterPanel } from '../../../components/FilterPanel/FilterPanel'
+import { NewSubmissionModal } from '../components/NewSubmissionModal/NewSubmissionModal'
 import { StatusBadge } from '../components/StatusBadge/StatusBadge'
 import { StatusSelect } from '../components/StatusSelect/StatusSelect'
 import { ChecklistResult, PhotoCount } from '../components/SubmissionCells/SubmissionCells'
@@ -52,26 +53,32 @@ const columns: Column<MySubmission>[] = [
 
 // /my-submissions: the framer's home page. Lists their forms, newest first, with filters
 // (site, status, date, checklist), and is the way to start a new one.
+// /my-submissions/new shows this same page with the new form open in a modal on top, so
+// the dashboard can link to it, Back closes it and a refresh keeps it open.
 export function MySubmissionsPage() {
   const { profile } = useAuth()
   const navigate = useNavigate()
   const userId = profile?.id
   const today = todayInVancouver()
   const canCreate = can(profile?.role, 'submissions.create')
+  const location = useLocation()
+  const newFormOpen = useMatch('/my-submissions/new') !== null && canCreate
 
   // Filters live in the URL (useUrlFilters; rules in myFilters.ts), so the dashboard can
   // link straight to a filtered list. No filter state here.
-  const {
-    params,
-    key: filterKey,
-    hasFilters,
-    activeCount,
-    listUrl,
-    setFilter,
-    setFilters,
-    clear,
-  } = useUrlFilters()
+  const { params, key: filterKey, hasFilters, activeCount, setFilter, setFilters, clear } = useUrlFilters()
   const filters = parseMyFilters(params)
+  // This list with its filters (not `listUrl`: on /my-submissions/new that would include "/new").
+  const listUrl = `/my-submissions${location.search}`
+  // Opening the form keeps the filters in the URL; `fromList` tells closing it to go Back.
+  const newFormLink = { pathname: '/my-submissions/new', search: location.search }
+
+  // Back if we opened it from here (so Back afterwards doesn't reopen it), otherwise
+  // (opened from a link or a refresh) replace /new with the list.
+  function closeNewForm() {
+    if ((location.state as { fromList?: boolean } | null)?.fromList) navigate(-1)
+    else navigate(listUrl, { replace: true })
+  }
 
   // Site options, once. If it fails, the dropdown only has "All sites" (the list still works).
   const { data: sites } = useAsync('sites', fetchSiteOptions, 'Loading sites failed.')
@@ -79,7 +86,7 @@ export function MySubmissionsPage() {
   // Daily reminder: its own small query, so it's right whatever the filters show.
   // null key until the user is known; if it fails: no reminder rather than a wrong one.
   // `userId!`: the request only runs when the key isn't null, i.e. when userId is set.
-  const { data: submittedToday } = useAsync(
+  const { data: submittedToday, reload: reloadToday } = useAsync(
     userId ? `${userId}:${today}` : null,
     () => fetchSubmittedToday(userId!, today),
     'Checking today failed.',
@@ -101,6 +108,12 @@ export function MySubmissionsPage() {
     'Could not load your submissions. Please refresh the page.',
   )
   const { loading, error } = list
+
+  // A new form was saved: show it in the list and update the reminder.
+  function handleSubmitted() {
+    list.reload()
+    reloadToday()
+  }
   const submissions = list.data
 
   // The date dropdown covers two parameters: a preset (`period`) or one exact day
@@ -122,17 +135,19 @@ export function MySubmissionsPage() {
       <PageHeader>
         <PageTitle>My submissions</PageTitle>
         {canCreate && (
-          <Button as={Link} to="/my-submissions/new">
+          <Button as={Link} to={newFormLink} state={{ fromList: true }}>
             <FilePlus size={18} aria-hidden="true" /> New form
           </Button>
         )}
       </PageHeader>
 
+      {newFormOpen && <NewSubmissionModal onClose={closeNewForm} onSubmitted={handleSubmitted} />}
+
       {/* Reminder: a form is expected before starting work each day. */}
       {canCreate && submittedToday === false && (
         <Reminder>
           <span>You haven't submitted today's safety form yet.</span>
-          <Button as={Link} to="/my-submissions/new">
+          <Button as={Link} to={newFormLink} state={{ fromList: true }}>
             Fill in today's form
           </Button>
         </Reminder>

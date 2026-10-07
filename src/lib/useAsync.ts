@@ -19,8 +19,12 @@ type Loaded<T> = { key: string; data: T | null; error: string | null }
 // - A slower, older response that arrives after a newer key started is dropped (`ignore`).
 // - Errors: the real one goes to the console, the page gets `errorMessage` (friendly).
 // - setData: change the loaded data in place (e.g. after a save), without reloading.
+// - reload: ask the server again with the same key (e.g. after creating a form). The old
+//   data stays on screen until the new data arrives, so the list doesn't flash "Loading…".
 export function useAsync<T>(key: string | null, load: () => Promise<T>, errorMessage: string) {
   const [loaded, setLoaded] = useState<Loaded<T> | null>(null)
+  // Bumped by reload(): a new value re-runs the effect below with the same key.
+  const [version, setVersion] = useState(0)
 
   // useEffectEvent: the effect always calls the latest `load` (with the latest filters)
   // without `load` being a dependency. A new function is created on every render, so as
@@ -41,7 +45,7 @@ export function useAsync<T>(key: string | null, load: () => Promise<T>, errorMes
     return () => {
       ignore = true
     }
-  }, [key, errorMessage])
+  }, [key, version, errorMessage])
 
   const current = loaded?.key === key ? loaded : null
 
@@ -57,5 +61,6 @@ export function useAsync<T>(key: string | null, load: () => Promise<T>, errorMes
     error: current?.error ?? null,
     loading: current === null,
     setData,
+    reload: () => setVersion((v) => v + 1),
   }
 }

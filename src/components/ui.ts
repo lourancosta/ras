@@ -146,6 +146,11 @@ export const SecondaryButton = styled(Button)`
   border: 1px solid ${({ theme }) => theme.colors.brand};
 `;
 
+// Red version of Button, for actions that throw something away (e.g. "Discard form").
+export const DangerButton = styled(Button)`
+  background: ${({ theme }) => theme.colors.danger};
+`;
+
 // Small rounded label, e.g. Active / Inactive in the settings tables.
 export const Pill = styled.span<{ $tone: "success" | "muted" }>`
   display: inline-block;

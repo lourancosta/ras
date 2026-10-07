@@ -21,8 +21,8 @@ Built as the technical assessment for the Junior Software Developer role.
     - PPE: hard hat, vest, boots and eye protection.
     - Fall protection, ladders and scaffolding, tools and cords, and hazards identified.
   - There's a notes field, up to 2,000 characters.
-- **Photos:**
-  - Take them with the camera or choose them from the phone: up to 5 photos, JPEG, PNG or WebP.
+- **Photos (required):**
+  - Take them with the camera or choose them from the phone: at least 1 and up to 5 photos, JPEG, PNG or WebP.
   - They're compressed in the browser (1920 px, JPEG 80%) and must be 5 MB or less.
 - **Clear messages:**
   - Success, including how many photos were uploaded.

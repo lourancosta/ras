@@ -1,32 +1,31 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Link } from 'react-router'
 import type { PostgrestError } from '@supabase/supabase-js'
-import { ArrowLeft } from 'lucide-react'
-import { useAuth } from '../../auth/auth-context'
-import { PhotoPicker } from '../components/PhotoPicker/PhotoPicker'
-import { Toggle } from '../../../components/Toggle/Toggle'
+import { useAuth } from '../../../auth/auth-context'
+import { PhotoPicker } from '../PhotoPicker/PhotoPicker'
+import { Modal } from '../../../../components/Modal/Modal'
+import { Toggle } from '../../../../components/Toggle/Toggle'
 import {
-  BackLink,
   Button,
+  DangerButton,
   SecondaryButton,
   ErrorMessage,
   Field,
   Form,
   Hint,
   Input,
-  PageTitle,
   Select,
   SuccessMessage,
   Textarea,
-} from '../../../components/ui'
-import { checklistGroups, emptyChecklist, type ChecklistAnswers } from '../checklist'
-import { formatDate, todayInVancouver } from '../../../lib/dates'
-import { MAX_PHOTOS, preparePhotos, uploadSubmissionPhotos, type SelectedPhoto } from '../photos'
-import { useAsync } from '../../../lib/useAsync'
-import { createSubmission, fetchActiveSites } from '../submissions'
-import { Container, Section, SectionTitle, Actions } from './NewSubmissionPage.styles'
+} from '../../../../components/ui'
+import { checklistGroups, checklistKeys, emptyChecklist, type ChecklistAnswers } from '../../checklist'
+import { formatDate, todayInVancouver } from '../../../../lib/dates'
+import { MAX_PHOTOS, preparePhotos, uploadSubmissionPhotos, type SelectedPhoto } from '../../photos'
+import { useAsync } from '../../../../lib/useAsync'
+import { createSubmission, fetchActiveSites } from '../../submissions'
+import { FooterActions, Section, SectionTitle, SubmitFooter } from './NewSubmissionModal.styles'
 
 const NOTES_MAX_LENGTH = 2000 // same limit as the DB check constraint
+const FORM_ID = 'new-submission-form' // lets the footer's submit button submit the form
 
 // Shown after a successful submit.
 type SubmittedInfo = {
@@ -39,7 +38,15 @@ type SubmittedInfo = {
 // What the submit button is doing right now (null = idle).
 type SubmitStep = 'saving' | 'uploading' | null
 
-export function NewSubmissionPage() {
+type NewSubmissionModalProps = {
+  onClose: () => void
+  onSubmitted: () => void // a form was saved: the page reloads its list and reminder
+}
+
+// The new safety form, in a modal (medium on wide screens, full screen on phones).
+// Closing it with something filled in asks first, so a tap outside or Escape doesn't
+// throw away a half-done form.
+export function NewSubmissionModal({ onClose, onSubmitted }: NewSubmissionModalProps) {
   const { profile } = useAuth()
   const today = todayInVancouver()
 
@@ -56,6 +63,9 @@ export function NewSubmissionPage() {
   const [checklist, setChecklist] = useState<ChecklistAnswers>(emptyChecklist)
   const [notes, setNotes] = useState('')
   const [photos, setPhotos] = useState<SelectedPhoto[]>([])
+
+  // "Discard this form?" question open.
+  const [confirmingClose, setConfirmingClose] = useState(false)
 
   // Photo picking state (compression takes a moment on phones).
   const [preparingPhotos, setPreparingPhotos] = useState(false)
@@ -102,6 +112,7 @@ export function NewSubmissionPage() {
     // 'YYYY-MM-DD' strings compare correctly as text.
     if (workDate > today) return "The date can't be in the future."
     if (notes.length > NOTES_MAX_LENGTH) return `Notes can be at most ${NOTES_MAX_LENGTH} characters.`
+    if (photos.length === 0) return 'Add at least one photo of the site.'
     if (photos.length > MAX_PHOTOS) return `Up to ${MAX_PHOTOS} photos per form.`
     return null
   }
@@ -143,6 +154,7 @@ export function NewSubmissionPage() {
       photosUploaded: photos.length - photosFailed,
       photosFailed,
     })
+    onSubmitted()
     photos.forEach((photo) => URL.revokeObjectURL(photo.previewUrl))
     setSiteId('')
     setWorkDate(today)
@@ -154,10 +166,49 @@ export function NewSubmissionPage() {
 
   const busy = submitStep !== null || preparingPhotos
 
+  // Derived, no state: anything different from a fresh form? (The date starts as today.)
+  const isDirty =
+    siteId !== '' ||
+    workDate !== today ||
+    checklistKeys.some((key) => checklist[key]) ||
+    notes.trim() !== '' ||
+    photos.length > 0
+
+  // ✕, Escape and a click outside all come here (Modal's onClose).
+  function requestClose() {
+    if (submitStep !== null) return // saving / uploading: wait, closing now would lose track of it
+    if (isDirty) setConfirmingClose(true)
+    else onClose()
+  }
+
+  // Leaving the page (refresh, closing the tab) with a filled form: the browser asks too.
+  useEffect(() => {
+    if (!isDirty) return
+    function warn(event: BeforeUnloadEvent) {
+      event.preventDefault() // browsers show their own "Leave site?" message
+    }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [isDirty])
+
+  // ---- After a successful submit ----
   if (submitted) {
     return (
-      <Container>
-        <PageTitle>New safety form</PageTitle>
+      <Modal
+        title="New safety form"
+        size="medium"
+        onClose={onClose}
+        footer={
+          <FooterActions>
+            <SecondaryButton type="button" onClick={() => setSubmitted(null)}>
+              Submit another form
+            </SecondaryButton>
+            <Button type="button" onClick={onClose}>
+              Close
+            </Button>
+          </FooterActions>
+        }
+      >
         <SuccessMessage>
           Safety form submitted for <strong>{submitted.siteName}</strong> on {formatDate(submitted.workDate)}
           {submitted.photosUploaded > 0 && ` with ${submitted.photosUploaded} photo(s)`}.
@@ -167,29 +218,30 @@ export function NewSubmissionPage() {
             {submitted.photosFailed} photo(s) could not be uploaded. The form itself was saved.
           </ErrorMessage>
         )}
-        <Actions>
-          <Button as={Link} to="/my-submissions">
-            View my submissions
-          </Button>
-          <SecondaryButton type="button" onClick={() => setSubmitted(null)}>
-            Submit another form
-          </SecondaryButton>
-        </Actions>
-      </Container>
+      </Modal>
     )
   }
 
+  // ---- The form ----
   return (
-    <Container>
-      {/* "New form" isn't in the menu, so the page offers its own way back. */}
-      <div>
-        <BackLink to="/my-submissions">
-          <ArrowLeft size={18} aria-hidden="true" /> Back to my submissions
-        </BackLink>
-        <PageTitle>New safety form</PageTitle>
-      </div>
-
-      <Form onSubmit={handleSubmit} noValidate>
+    <Modal
+      title="New safety form"
+      size="medium"
+      onClose={requestClose}
+      footer={
+        <SubmitFooter>
+          {/* form={FORM_ID}: the footer sits outside the <form>, this links the button to it. */}
+          <Button type="submit" form={FORM_ID} disabled={busy || !sites}>
+            {submitStep === 'saving'
+              ? 'Saving form…'
+              : submitStep === 'uploading'
+                ? 'Uploading photos…'
+                : 'Submit form'}
+          </Button>
+        </SubmitFooter>
+      }
+    >
+      <Form id={FORM_ID} onSubmit={handleSubmit} noValidate>
         <Section>
           {/* Worker name comes from the signed-in user, not from a form field. */}
           <Field as="div">
@@ -202,7 +254,13 @@ export function NewSubmissionPage() {
             {sitesError ? (
               <ErrorMessage>{sitesError}</ErrorMessage>
             ) : (
-              <Select required value={siteId} onChange={(e) => setSiteId(e.target.value)} disabled={!sites}>
+              <Select
+                required
+                value={siteId}
+                onChange={(e) => setSiteId(e.target.value)}
+                disabled={!sites}
+                data-autofocus
+              >
                 <option value="">{sites ? 'Select a site…' : 'Loading sites…'}</option>
                 {sites?.map((site) => (
                   <option key={site.id} value={site.id}>
@@ -246,6 +304,19 @@ export function NewSubmissionPage() {
         ))}
 
         <Section>
+          <SectionTitle>Photos</SectionTitle>
+          <Hint>
+            At least 1 photo of the site conditions, PPE or hazards. Up to {MAX_PHOTOS} photos, JPEG, PNG or
+            WebP, max 5 MB each.
+          </Hint>
+          <PhotoPicker photos={photos} onAdd={handleAddPhotos} onRemove={handleRemovePhoto} disabled={busy} />
+          {preparingPhotos && <Hint>Preparing photos…</Hint>}
+          {photoErrors.map((message) => (
+            <ErrorMessage key={message}>{message}</ErrorMessage>
+          ))}
+        </Section>
+
+        <Section>
           <Field>
             Notes (optional)
             <Textarea
@@ -260,29 +331,24 @@ export function NewSubmissionPage() {
           </Field>
         </Section>
 
-        <Section>
-          <SectionTitle>Photos (optional)</SectionTitle>
-          <Hint>
-            Site conditions, PPE, hazards. Up to {MAX_PHOTOS} photos, JPEG, PNG or WebP, max 5 MB each.
-          </Hint>
-          <PhotoPicker photos={photos} onAdd={handleAddPhotos} onRemove={handleRemovePhoto} disabled={busy} />
-          {preparingPhotos && <Hint>Preparing photos…</Hint>}
-          {photoErrors.map((message) => (
-            <ErrorMessage key={message}>{message}</ErrorMessage>
-          ))}
-        </Section>
-
         {error && <ErrorMessage>{error}</ErrorMessage>}
-
-        <Button type="submit" disabled={busy || !sites}>
-          {submitStep === 'saving'
-            ? 'Saving form…'
-            : submitStep === 'uploading'
-              ? 'Uploading photos…'
-              : 'Submit safety form'}
-        </Button>
       </Form>
-    </Container>
+
+      {/* Opens over this modal (a dialog can open on top of another one). */}
+      {confirmingClose && (
+        <Modal title="Discard this form?" tone="danger" onClose={() => setConfirmingClose(false)}>
+          <p>What you filled in will be lost.</p>
+          <FooterActions>
+            <SecondaryButton type="button" onClick={() => setConfirmingClose(false)} data-autofocus>
+              Keep editing
+            </SecondaryButton>
+            <DangerButton type="button" onClick={onClose}>
+              Discard form
+            </DangerButton>
+          </FooterActions>
+        </Modal>
+      )}
+    </Modal>
   )
 }
 
