@@ -4,38 +4,34 @@ A web app that emulates an internal RAS (Ron Anderson & Sons) tool. Before start
 daily safety form for their job site from their phone, with a checklist, notes and photos. Admins see who has
 submitted, on which site and when, review each form and flag anything that needs follow-up.
 
-Built as the technical assessment for the Junior Software Developer role.
-
 - **Live app:** https://ras-psi.vercel.app
 - **ERD:** [doc/ras-erd.png](doc/ras-erd.png) (source: [doc/erd.dbml](doc/erd.dbml), made with dbdiagram.io)
-- **Test credentials:** one Admin and one Framer account, sent in the submission email. They aren't in this
-  public repo, so nobody else can sign in as admin.
 
 ## Screenshots
 
 **Framer**
 
-| Dashboard | My submissions |
-|---|---|
+| Dashboard                                                                                                                | My submissions                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ![Framer dashboard: today's status, forms per day and issues by checklist item](public/screenshots/framer-dashboard.png) | ![My submissions: filters by site, status, date and checklist, with each form's issues, photos and status](public/screenshots/framer-submissions-list.png) |
-| Own numbers for the last 14 days. Clicking a tile or a bar opens the matching filtered list. | Filters by site, status, date and checklist. Each row shows its issues, photo count and review status. |
+| Own numbers for the last 14 days. Clicking a tile or a bar opens the matching filtered list.                             | Filters by site, status, date and checklist. Each row shows its issues, photo count and review status.                                                     |
 
-| New safety form |
-|---|
-| ![New safety form in a modal: worker, job site, date and the PPE checklist](public/screenshots/framer-new-submission-form.png) |
+| New safety form                                                                                                                          |
+| ---------------------------------------------------------------------------------------------------------------------------------------- |
+| ![New safety form in a modal: worker, job site, date and the PPE checklist](public/screenshots/framer-new-submission-form.png)           |
 | Opens in a modal (full screen on phones). The worker comes from the signed-in account, and the submit button stays pinned at the bottom. |
 
 **Admin**
 
-| Submission detail | Review queue |
-|---|---|
+| Submission detail                                                                                                                            | Review queue                                                                                                                                   |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | ![Submission detail: header, review panel with Flag / Review, checklist answers, notes and photos](public/screenshots/submision-details.png) | ![Review queue: one pending form at a time with a 2 / 5 counter, Flag / Review and Previous / Next](public/screenshots/admin-review-queue.png) |
-| The full form, with Flag / Review next to the explanation and the photos in one row. Tap a photo for the full-screen viewer. | Works through the pending forms one by one, oldest first, with a progress counter. |
+| The full form, with Flag / Review next to the explanation and the photos in one row. Tap a photo for the full-screen viewer.                 | Works through the pending forms one by one, oldest first, with a progress counter.                                                             |
 
-| Workers (Settings) |
-|---|
+| Workers (Settings)                                                                                                                |
+| --------------------------------------------------------------------------------------------------------------------------------- |
 | ![Workers list with the New worker modal: full name, email, role and temporary password](public/screenshots/admin-new-worker.png) |
-| Admins create accounts with a role and a temporary password, and can edit or deactivate them. |
+| Admins create accounts with a role and a temporary password, and can edit or deactivate them.                                     |
 
 **Phone (framer)**
 
@@ -53,6 +49,7 @@ Built as the technical assessment for the Junior Software Developer role.
 ## Features
 
 **Framer (phone-first)**
+
 - **New safety form:**
   - Pick an active job site and the date: today by default, never in the future. The worker comes from the
     signed-in account.
@@ -74,6 +71,7 @@ Built as the technical assessment for the Junior Software Developer role.
 - **Dashboard:** the framer's own numbers and charts. Clicking a tile or a bar opens the matching filtered list.
 
 **Admin**
+
 - **Dashboard:**
   - Today's tiles: workers submitted, not submitted today, pending review, flagged.
   - "Who hasn't submitted today" and today's forms by site.
@@ -93,15 +91,15 @@ Built as the technical assessment for the Junior Software Developer role.
 
 ## Tech stack
 
-| Area | Choice |
-|---|---|
-| Frontend | React 19 + TypeScript, Vite |
-| Routing | React Router (library mode) |
-| Styling | styled-components, theme tokens in `src/styles/theme.ts` (RAS green `#035339`) |
-| Charts / icons | Recharts, lucide-react |
-| Backend | Supabase: Postgres, Auth (email + password), Storage (private photo bucket), one Edge Function |
-| Security | Postgres Row Level Security (RLS) and column-level grants |
-| Hosting | Vercel (frontend) + Supabase (managed) |
+| Area           | Choice                                                                                         |
+| -------------- | ---------------------------------------------------------------------------------------------- |
+| Frontend       | React 19 + TypeScript, Vite                                                                    |
+| Routing        | React Router (library mode)                                                                    |
+| Styling        | styled-components, theme tokens in `src/styles/theme.ts` (RAS green `#035339`)                 |
+| Charts / icons | Recharts, lucide-react                                                                         |
+| Backend        | Supabase: Postgres, Auth (email + password), Storage (private photo bucket), one Edge Function |
+| Security       | Postgres Row Level Security (RLS) and column-level grants                                      |
+| Hosting        | Vercel (frontend) + Supabase (managed)                                                         |
 
 There's no custom API server. The browser talks to Supabase with the **publishable** key, and the database
 decides what each user may read or write. The only server code is the `manage-worker` Edge Function. Creating
@@ -138,12 +136,12 @@ sees. This is UX only, and the database stays the source of truth.
 
 See the [ERD](doc/ras-erd.png). In short:
 
-| Table | Purpose |
-|---|---|
-| `profiles` | One per login (same id as Supabase `auth.users`): name, role (`framer` / `admin`), email copy, active flag |
-| `sites` | Job sites: unique name, address, active flag (inactive sites stay in history but can't get new forms) |
-| `submissions` | One safety form: worker, site, work date, 8 checklist booleans, notes, review status, reviewer and time. **Unique (worker, site, date)**: one form per site per day |
-| `submission_photos` | One row per photo: storage path, type, size; belongs to a submission |
+| Table               | Purpose                                                                                                                                                             |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `profiles`          | One per login (same id as Supabase `auth.users`): name, role (`framer` / `admin`), email copy, active flag                                                          |
+| `sites`             | Job sites: unique name, address, active flag (inactive sites stay in history but can't get new forms)                                                               |
+| `submissions`       | One safety form: worker, site, work date, 8 checklist booleans, notes, review status, reviewer and time. **Unique (worker, site, date)**: one form per site per day |
+| `submission_photos` | One row per photo: storage path, type, size; belongs to a submission                                                                                                |
 
 The checklist answers are 8 boolean columns rather than a separate answers table. The checklist is fixed, so
 this keeps queries and filters simple ("forms with any No"). A configurable checklist would need its own
@@ -167,6 +165,7 @@ src/
 ```
 
 Conventions:
+
 - **Styles:** each component with styles is a folder, with `X.tsx` for the markup and `X.styles.ts` for the
   styled components.
 - **Data access:** pages never call Supabase directly. Every query lives in a feature data file such as
@@ -184,14 +183,17 @@ npm run dev                  # http://localhost:5173
 ```
 
 `.env.local`:
+
 ```
 VITE_SUPABASE_URL=https://<project-ref>.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 ```
+
 Both values are in the Supabase dashboard › Project Settings › API Keys. Use the **publishable** key only.
 The app refuses to start if a secret key is used by mistake.
 
 Other scripts:
+
 - `npm run dev:phone`: serves over HTTPS on your local network to test on a real phone. The camera and
   `crypto.randomUUID` need a secure context.
 - `npm run build`: type-check and production build.

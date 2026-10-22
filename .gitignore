@@ -28,6 +28,7 @@ CLAUDE.md
 
 # Local study notes (not shared)
 doc/STUDY_NOTES.md
+doc/*.pdf
 
 # Supabase migrations and Edge Functions (kept locally; already applied / deployed in Supabase)
 supabase/
@@ -38,3 +39,4 @@ scripts/
 # Kept locally only: confidential assessment brief, unused screenshot
 doc/RAS_Junior_Developer_Technical_Assessment.pdf
 public/screenshots/mobile03.jpeg
+src/lib/liveCodeExercise.js
