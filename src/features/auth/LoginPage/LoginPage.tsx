@@ -58,7 +58,7 @@ export function LoginPage() {
     <Page>
       {/* Left (top on phones): what this app is. */}
       <BrandPanel>
-        <FullLogo src="/ras-full-logo.webp" alt="RAS Framing & Formwork" />
+        <FullLogo src="/logo.svg" alt="SiteCheck" />
         <Pitch>
           <Headline>Daily site safety, in one place.</Headline>
           <Features>

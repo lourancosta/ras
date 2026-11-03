@@ -1,11 +1,11 @@
-# RAS Site Safety Forms
+# SiteCheck: Site Safety Forms
 
-A web app that emulates an internal RAS (Ron Anderson & Sons) tool. Before starting work, framers fill in a
+A web app for a framing and construction crew. Before starting work, framers fill in a
 daily safety form for their job site from their phone, with a checklist, notes and photos. Admins see who has
 submitted, on which site and when, review each form and flag anything that needs follow-up.
 
 - **Live app:** https://ras-psi.vercel.app
-- **ERD:** [doc/ras-erd.png](doc/ras-erd.png) (source: [doc/erd.dbml](doc/erd.dbml), made with dbdiagram.io)
+- **ERD:** [doc/erd.png](doc/erd.png) (source: [doc/erd.dbml](doc/erd.dbml), made with dbdiagram.io)
 
 ## Screenshots
 
@@ -95,7 +95,7 @@ submitted, on which site and when, review each form and flag anything that needs
 | -------------- | ---------------------------------------------------------------------------------------------- |
 | Frontend       | React 19 + TypeScript, Vite                                                                    |
 | Routing        | React Router (library mode)                                                                    |
-| Styling        | styled-components, theme tokens in `src/styles/theme.ts` (RAS green `#035339`)                 |
+| Styling        | styled-components, theme tokens in `src/styles/theme.ts` (brand green `#035339`)               |
 | Charts / icons | Recharts, lucide-react                                                                         |
 | Backend        | Supabase: Postgres, Auth (email + password), Storage (private photo bucket), one Edge Function |
 | Security       | Postgres Row Level Security (RLS) and column-level grants                                      |
@@ -134,7 +134,7 @@ sees. This is UX only, and the database stays the source of truth.
 
 ## Data model
 
-See the [ERD](doc/ras-erd.png). In short:
+See the [ERD](doc/erd.png). In short:
 
 | Table               | Purpose                                                                                                                                                             |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -210,8 +210,8 @@ refresh, and it adds the security headers.
 
 ## Assumptions
 
-- **Branding:** the RAS green and logos come from the RAS website and Instagram. The amber accent, used for
-  highlights and focus rings, is our own choice, not an official RAS colour.
+- **Branding:** SiteCheck is a fictional brand made for this portfolio project. The green is used for the menu,
+  buttons and titles; the amber accent, a safety colour, for highlights and focus rings.
 - **One form per worker, per site, per day.** A framer who works on two sites submits two forms.
 - **Dates:**
   - "Today" is **Vancouver time** (America/Vancouver), in the app and in the database rules. A form can't be

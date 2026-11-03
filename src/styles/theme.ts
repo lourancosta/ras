@@ -1,9 +1,9 @@
 // Design tokens shared by every styled component (via ThemeProvider).
-// Brand green and logo from the RAS website. The amber accent is our choice (safety
-// colour for highlights and focus rings), not an official RAS colour.
+// Brand green for the side menu, buttons and titles; amber accent as the safety
+// colour for highlights and focus rings.
 export const theme = {
   colors: {
-    brand: "#035339", // RAS green: side menu, primary buttons, titles
+    brand: "#035339", // brand green: side menu, primary buttons, titles
     brandText: "#ffffff",
     brandTint: "rgba(255, 255, 255, 0.12)", // highlight on top of brand (active menu item)
     accent: "#f59e0b", // safety amber: highlights, focus rings
